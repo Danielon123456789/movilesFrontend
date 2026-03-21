@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
+import '../../../../app/router/routes.dart';
+import '../../../../shared/widgets/app_bottom_nav.dart';
 import '../controllers/patients_controller.dart';
 import '../widgets/patient_card.dart';
 import '../widgets/patients_header.dart';
@@ -44,25 +47,22 @@ class PatientsScreen extends ConsumerWidget {
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: AppBottomNav(
         currentIndex: 1,
-        onTap: (_) {},
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month_outlined),
-            label: 'Agenda',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.groups_outlined),
-            label: 'Pacientes',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: 'Dashboard',
-          ),
-        ],
+        onTap: (index) => _onNavTap(context, index),
       ),
     );
+  }
+
+  static void _onNavTap(BuildContext context, int index) {
+    switch (index) {
+      case 0:
+        context.go(Routes.agenda);
+      case 1:
+        context.go(Routes.patients);
+      case 2:
+        context.go(Routes.dashboard);
+    }
   }
 
   static String _filterLabel(PatientsFilter filter) {
