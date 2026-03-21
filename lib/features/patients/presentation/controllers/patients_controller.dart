@@ -9,7 +9,7 @@ class PatientsState {
     required this.patients,
     required this.query,
     required this.filter,
-  });
+    });
 
   final List<Patient> patients;
   final String query;
