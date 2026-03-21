@@ -25,6 +25,8 @@ class AppColors {
 
   static const Color badge = Color(0xFFFF4D4D);
 
+  static const Color accentBlue = Color(0xFF4A90D9);
+
   static const Color success = Color(0xFF2E7D32);
   static const Color warning = Color(0xFFED6C02);
   static const Color error = Color(0xFFD32F2F);
