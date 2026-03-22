@@ -9,7 +9,12 @@ import 'agenda_day_cell.dart';
 const List<String> _weekdayLabels = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
 
 class AgendaCalendarSection extends ConsumerWidget {
-  const AgendaCalendarSection({super.key});
+  const AgendaCalendarSection({
+    super.key,
+    this.onDayTap,
+  });
+
+  final ValueChanged<DateTime>? onDayTap;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -95,13 +100,15 @@ class AgendaCalendarSection extends ConsumerWidget {
                   hasAppointments: cells[i] != null &&
                       daysWithAppointments.contains(cells[i]),
                   onTap: cells[i] != null
-                      ? () => notifier.selectDate(
-                            DateTime(
-                              state.visibleMonth.year,
-                              state.visibleMonth.month,
-                              cells[i]!,
-                            ),
-                          )
+                      ? () {
+                          final date = DateTime(
+                            state.visibleMonth.year,
+                            state.visibleMonth.month,
+                            cells[i]!,
+                          );
+                          notifier.selectDate(date);
+                          onDayTap?.call(date);
+                        }
                       : null,
                 ),
             ],

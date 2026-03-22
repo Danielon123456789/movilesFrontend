@@ -24,6 +24,7 @@ class AppColors {
   static const Color chipInactiveFg = Color(0xFFE04F5F);
 
   static const Color badge = Color(0xFFFF4D4D);
+  static const Color currentTimeIndicator = Color(0xFFE53935);
 
   static const Color accentBlue = Color(0xFF4A90D9);
 

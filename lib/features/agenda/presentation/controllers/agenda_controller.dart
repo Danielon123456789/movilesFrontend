@@ -158,6 +158,20 @@ final appointmentsForSelectedDateProvider = Provider<List<Appointment>>((ref) {
       .toList(growable: false);
 });
 
+final appointmentsForDateProvider =
+    Provider.family<List<Appointment>, DateTime>((ref, date) {
+  final all = ref.watch(mockAppointmentsProvider);
+  return all
+      .where((a) => _sameDate(a.date, date))
+      .toList(growable: false);
+});
+
+List<DateTime> weekContaining(DateTime date) {
+  final sundayOffset = date.weekday % 7;
+  final sunday = date.subtract(Duration(days: sundayOffset));
+  return List.generate(7, (i) => sunday.add(Duration(days: i)));
+}
+
 final daysWithAppointmentsProvider = Provider<Set<int>>((ref) {
   final state = ref.watch(agendaControllerProvider);
   final appointments = ref.watch(mockAppointmentsProvider);

@@ -39,7 +39,10 @@ class AgendaScreen extends ConsumerWidget {
               child: ListView(
                 children: [
                   const SizedBox(height: AppSpacing.md),
-                  const AgendaCalendarSection(),
+                  AgendaCalendarSection(
+                    onDayTap: (date) =>
+                        context.push(Routes.agendaDayPath(date)),
+                  ),
                   const SizedBox(height: AppSpacing.md),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
