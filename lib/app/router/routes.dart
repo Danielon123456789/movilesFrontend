@@ -3,7 +3,9 @@ class Routes {
   static const String home = '/';
   static const String agenda = '/agenda';
   static const String agendaDay = '/agenda/day';
+  static const String appointmentDetail = '/agenda/detail';
   static const String patients = '/patients';
+  static const String patientDetail = '/patients/detail';
   static const String dashboard = '/dashboard';
 
   static String agendaDayPath(DateTime date) {

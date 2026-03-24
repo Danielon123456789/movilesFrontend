@@ -9,16 +9,21 @@ class PatientCard extends StatelessWidget {
   const PatientCard({
     super.key,
     required this.patient,
+    this.onTap,
   });
 
   final Patient patient;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final accent = patient.isActive ? AppColors.chipActiveFg : AppColors.chipInactiveFg;
 
-    return Container(
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
       margin: const EdgeInsets.fromLTRB(
         AppSpacing.md,
         0,
@@ -101,6 +106,7 @@ class PatientCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }

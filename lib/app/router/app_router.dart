@@ -1,10 +1,14 @@
 import 'package:go_router/go_router.dart';
 
+import '../../features/agenda/domain/entities/appointment.dart';
 import '../../features/agenda/presentation/screens/agenda_screen.dart';
+import '../../features/agenda/presentation/screens/appointment_detail_screen.dart';
 import '../../features/agenda/presentation/screens/daily_agenda_screen.dart';
 import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/patients/domain/entities/patient.dart';
+import '../../features/patients/presentation/screens/patient_detail_screen.dart';
 import '../../features/patients/presentation/screens/patients_screen.dart';
 import 'routes.dart';
 
@@ -28,11 +32,27 @@ final GoRouter appRouter = GoRouter(
             return DailyAgendaScreen(selectedDate: date);
           },
         ),
+        GoRoute(
+          path: 'detail',
+          builder: (context, state) {
+            final appointment = state.extra! as Appointment;
+            return AppointmentDetailScreen(appointment: appointment);
+          },
+        ),
       ],
     ),
     GoRoute(
       path: Routes.patients,
       builder: (context, state) => const PatientsScreen(),
+      routes: [
+        GoRoute(
+          path: 'detail',
+          builder: (context, state) {
+            final patient = state.extra! as Patient;
+            return PatientDetailScreen(patient: patient);
+          },
+        ),
+      ],
     ),
     GoRoute(
       path: Routes.dashboard,

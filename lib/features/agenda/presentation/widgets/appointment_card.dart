@@ -8,13 +8,18 @@ class AppointmentCard extends StatelessWidget {
   const AppointmentCard({
     super.key,
     required this.appointment,
+    this.onTap,
   });
 
   final Appointment appointment;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
         vertical: 12,
@@ -65,6 +70,7 @@ class AppointmentCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }

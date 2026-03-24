@@ -100,6 +100,10 @@ class _DailyAgendaScreenState extends ConsumerState<DailyAgendaScreen> {
                 AgendaTimeline(
                   showCurrentTimeIndicator: isToday,
                   appointments: appointments,
+                  onAppointmentTap: (appt) => context.push(
+                    '/agenda/detail',
+                    extra: appt,
+                  ),
                 ),
               ],
             ),

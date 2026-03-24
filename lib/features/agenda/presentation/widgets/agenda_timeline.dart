@@ -15,10 +15,12 @@ class AgendaTimeline extends StatelessWidget {
     super.key,
     required this.showCurrentTimeIndicator,
     this.appointments = const [],
+    this.onAppointmentTap,
   });
 
   final bool showCurrentTimeIndicator;
   final List<Appointment> appointments;
+  final ValueChanged<Appointment>? onAppointmentTap;
 
   @override
   Widget build(BuildContext context) {
@@ -150,9 +152,12 @@ class AgendaTimeline extends StatelessWidget {
         left: 60,
         right: 4,
         height: height,
-        child: _TimelineAppointmentCard(
-          appointment: appt,
-          displayTimeRange: label,
+        child: GestureDetector(
+          onTap: onAppointmentTap != null ? () => onAppointmentTap!(appt) : null,
+          child: _TimelineAppointmentCard(
+            appointment: appt,
+            displayTimeRange: label,
+          ),
         ),
       ),
     ];

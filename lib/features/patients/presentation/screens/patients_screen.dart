@@ -39,7 +39,11 @@ class PatientsScreen extends ConsumerWidget {
                     filterLabel: _filterLabel(state.filter),
                     onFilterTap: () => _showFilterSheet(context, ref),
                   ),
-                  for (final p in patients) PatientCard(patient: p),
+                  for (final p in patients)
+                    PatientCard(
+                      patient: p,
+                      onTap: () => context.push('/patients/detail', extra: p),
+                    ),
                   const SizedBox(height: AppSpacing.lg),
                 ],
               ),

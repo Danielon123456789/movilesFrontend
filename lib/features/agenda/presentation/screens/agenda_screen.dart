@@ -174,7 +174,13 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                   if (_isExpanded) ...[
                     if (appointments.isNotEmpty) ...[
                       for (var i = 0; i < appointments.length; i++) ...[
-                        AppointmentCard(appointment: appointments[i]),
+                        AppointmentCard(
+                          appointment: appointments[i],
+                          onTap: () => context.push(
+                            '/agenda/detail',
+                            extra: appointments[i],
+                          ),
+                        ),
                         if (i < appointments.length - 1)
                           const Divider(
                             height: 1,
