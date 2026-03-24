@@ -1,3 +1,4 @@
+import 'package:agenda/app/app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -160,9 +161,9 @@ class _ProfileCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _ProfileHeader(),
-          SizedBox(height: 28),
+          SizedBox(height: AppSpacing.lg),
           _InfoRow(icon: Icons.mail_outline, text: 'juan.perez@clinica.com'),
-          SizedBox(height: 24),
+          SizedBox(height: AppSpacing.lg),
           _InfoRow(icon: Icons.phone_outlined, text: '+52 55 1234 5678'),
         ],
       ),
@@ -208,7 +209,7 @@ class _ProfileHeader extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: AppSpacing.sm),
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 14,
