@@ -10,15 +10,37 @@ import '../../../../shared/widgets/app_bottom_nav.dart';
 import '../../../../shared/widgets/app_screen_header.dart';
 import '../controllers/agenda_controller.dart';
 import '../widgets/agenda_calendar_section.dart';
+import '../widgets/agenda_empty_state.dart';
 import '../widgets/appointment_card.dart';
 
-class AgendaScreen extends ConsumerWidget {
+class AgendaScreen extends ConsumerStatefulWidget {
   const AgendaScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AgendaScreen> createState() => _AgendaScreenState();
+}
+
+class _AgendaScreenState extends ConsumerState<AgendaScreen> {
+  bool _isExpanded = true;
+  String? _selectedTherapist;
+
+  static const _therapists = [
+    'Todos',
+    'Daniel Hernández',
+    'Sergio Gómez',
+    'Roberto Gómez',
+    'Carlos Rodríguez',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(agendaControllerProvider);
-    final appointments = ref.watch(appointmentsForSelectedDateProvider);
+    final allAppointments = ref.watch(appointmentsForSelectedDateProvider);
+    final appointments = _selectedTherapist == null
+        ? allAppointments
+        : allAppointments
+            .where((a) => a.therapist == _selectedTherapist)
+            .toList();
 
     final headerDate = DateFormat('EEEE, d \'de\' MMMM', 'es')
         .format(state.selectedDate)
@@ -38,26 +60,139 @@ class AgendaScreen extends ConsumerWidget {
             Expanded(
               child: ListView(
                 children: [
-                  const SizedBox(height: AppSpacing.md),
+                  const SizedBox(height: AppSpacing.sm),
                   AgendaCalendarSection(
                     onDayTap: (date) =>
                         context.push(Routes.agendaDayPath(date)),
                   ),
                   const SizedBox(height: AppSpacing.md),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                    child: Text(
-                      'Citas de hoy',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () =>
+                                setState(() => _isExpanded = !_isExpanded),
+                            child: Row(
+                              children: [
+                                const Text(
+                                  'Citas de hoy',
+                                  style: TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                                const SizedBox(width: AppSpacing.xs),
+                                Icon(
+                                  _isExpanded
+                                      ? Icons.keyboard_arrow_down
+                                      : Icons.keyboard_arrow_right,
+                                  size: 22,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ],
+                            ),
                           ),
+                        ),
+                        PopupMenuButton<String>(
+                          onSelected: (value) => setState(() {
+                            _selectedTherapist =
+                                value == 'Todos' ? null : value;
+                          }),
+                          offset: const Offset(0, 44),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          itemBuilder: (_) => _therapists
+                              .map(
+                                (t) => PopupMenuItem(
+                                  value: t,
+                                  child: Text(
+                                    t,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400,
+                                      color: (t == 'Todos' &&
+                                                  _selectedTherapist ==
+                                                      null) ||
+                                              t == _selectedTherapist
+                                          ? AppColors.appointmentAccent
+                                          : AppColors.textPrimary,
+                                    ),
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                          child: Container(
+                            height: 36,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.surface,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: AppColors.appointmentAccent,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  _selectedTherapist ?? 'Terapeutas',
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.appointmentAccent,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                const Icon(
+                                  Icons.arrow_drop_down,
+                                  size: 20,
+                                  color: AppColors.appointmentAccent,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.md),
-                  for (var i = 0; i < appointments.length; i++) ...[
-                    AppointmentCard(appointment: appointments[i]),
-                    if (i < appointments.length - 1)
-                      const SizedBox(height: AppSpacing.md),
+                  const SizedBox(height: AppSpacing.sm),
+                  const Divider(
+                    height: 1,
+                    thickness: 1,
+                    color: AppColors.divider,
+                    indent: AppSpacing.md,
+                    endIndent: AppSpacing.md,
+                  ),
+                  if (_isExpanded) ...[
+                    if (appointments.isNotEmpty) ...[
+                      for (var i = 0; i < appointments.length; i++) ...[
+                        AppointmentCard(appointment: appointments[i]),
+                        if (i < appointments.length - 1)
+                          const Divider(
+                            height: 1,
+                            thickness: 1,
+                            color: AppColors.divider,
+                            indent: AppSpacing.md,
+                            endIndent: AppSpacing.md,
+                          ),
+                      ],
+                      const Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: AppColors.divider,
+                        indent: AppSpacing.md,
+                        endIndent: AppSpacing.md,
+                      ),
+                    ] else
+                      const AgendaEmptyState(),
                   ],
                   const SizedBox(height: AppSpacing.md),
                 ],
@@ -66,6 +201,19 @@ class AgendaScreen extends ConsumerWidget {
           ],
         ),
       ),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: FloatingActionButton(
+          onPressed: () {
+            // TODO: navigate to create appointment
+          },
+          backgroundColor: AppColors.accentBlue,
+          elevation: 4,
+          shape: const CircleBorder(),
+          child: const Icon(Icons.add, color: Colors.white),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: AppBottomNav(
         currentIndex: 0,
         onTap: (index) => _onNavTap(context, index),

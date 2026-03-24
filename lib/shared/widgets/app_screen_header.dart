@@ -4,11 +4,7 @@ import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 
 class AppScreenHeader extends StatelessWidget {
-  const AppScreenHeader({
-    super.key,
-    required this.date,
-    required this.title,
-  });
+  const AppScreenHeader({super.key, required this.date, required this.title});
 
   final String date;
   final String title;
@@ -24,9 +20,7 @@ class AppScreenHeader extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: AppColors.chipActiveFg,
-        borderRadius: const BorderRadius.vertical(
-          bottom: Radius.circular(28),
-        ),
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -37,8 +31,10 @@ class AppScreenHeader extends StatelessWidget {
               children: [
                 Text(
                   date,
-                  style: textTheme.labelSmall?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.9),
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: Color.fromARGB(221, 254, 254, 254),
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -77,10 +73,7 @@ class _NotificationButton extends StatelessWidget {
             onTap: () {},
             child: const Padding(
               padding: EdgeInsets.all(AppSpacing.sm),
-              child: Icon(
-                Icons.notifications_none,
-                color: Colors.white,
-              ),
+              child: Icon(Icons.notifications_none, color: Colors.white),
             ),
           ),
         ),

@@ -111,6 +111,7 @@ final mockAppointmentsProvider = Provider<List<Appointment>>((ref) {
       category: 'Fisioterapia General',
       date: DateTime(now.year, now.month, 3),
       timeRange: '10:00 - 11:00',
+      therapist: 'Daniel Hernández',
     ),
     Appointment(
       id: '2',
@@ -118,6 +119,7 @@ final mockAppointmentsProvider = Provider<List<Appointment>>((ref) {
       category: 'Ajuste Quiropráctico',
       date: DateTime(now.year, now.month, 10),
       timeRange: '09:00 - 09:45',
+      therapist: 'Sergio Gómez',
     ),
     Appointment(
       id: '3',
@@ -125,6 +127,7 @@ final mockAppointmentsProvider = Provider<List<Appointment>>((ref) {
       category: 'Fisioterapia General',
       date: DateTime(now.year, now.month, 10),
       timeRange: '15:30 - 16:30',
+      therapist: 'Roberto Gómez',
     ),
     Appointment(
       id: '4',
@@ -132,6 +135,7 @@ final mockAppointmentsProvider = Provider<List<Appointment>>((ref) {
       category: 'Consulta',
       date: DateTime(now.year, now.month, 15),
       timeRange: '11:00 - 12:00',
+      therapist: 'Carlos Rodríguez',
     ),
     Appointment(
       id: '5',
@@ -139,6 +143,7 @@ final mockAppointmentsProvider = Provider<List<Appointment>>((ref) {
       category: 'Fisioterapia General',
       date: DateTime(now.year, now.month, 22),
       timeRange: '16:00 - 17:00',
+      therapist: 'Daniel Hernández',
     ),
     Appointment(
       id: '6',
@@ -146,6 +151,7 @@ final mockAppointmentsProvider = Provider<List<Appointment>>((ref) {
       category: 'Revisión',
       date: DateTime(now.year, now.month, 22),
       timeRange: '12:00 - 12:30',
+      therapist: 'Sergio Gómez',
     ),
   ];
 });

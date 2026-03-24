@@ -28,6 +28,11 @@ class AppColors {
 
   static const Color accentBlue = Color(0xFF4A90D9);
 
+  static const Color appointmentAccent = Color(0xFF10B981);
+  static const Color appointmentTintBg = Color(0xFFECFDF5);
+  static const Color textMuted = Color(0xFF6B7280);
+  static const Color divider = Color(0xFFE5E7EB);
+
   static const Color success = Color(0xFF2E7D32);
   static const Color warning = Color(0xFFED6C02);
   static const Color error = Color(0xFFD32F2F);

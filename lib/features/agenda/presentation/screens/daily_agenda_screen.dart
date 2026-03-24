@@ -66,6 +66,7 @@ class _DailyAgendaScreenState extends ConsumerState<DailyAgendaScreen> {
           }).join(' ');
 
     final textTheme = Theme.of(context).textTheme;
+    final appointments = ref.watch(appointmentsForSelectedDateProvider);
 
     return Scaffold(
       backgroundColor: AppColors.bgCanvas,
@@ -96,12 +97,28 @@ class _DailyAgendaScreenState extends ConsumerState<DailyAgendaScreen> {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                AgendaTimeline(showCurrentTimeIndicator: isToday),
+                AgendaTimeline(
+                  showCurrentTimeIndicator: isToday,
+                  appointments: appointments,
+                ),
               ],
             ),
           ),
         ],
       ),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: FloatingActionButton(
+          onPressed: () {
+            // TODO: navigate to create appointment
+          },
+          backgroundColor: AppColors.accentBlue,
+          elevation: 4,
+          shape: const CircleBorder(),
+          child: const Icon(Icons.add, color: Colors.white),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: AppBottomNav(
         currentIndex: 0,
         onTap: (index) => _onNavTap(context, index),

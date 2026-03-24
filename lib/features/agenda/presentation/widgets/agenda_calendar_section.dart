@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../controllers/agenda_controller.dart';
 import 'agenda_day_cell.dart';
@@ -28,6 +29,9 @@ class AgendaCalendarSection extends ConsumerWidget {
         .split(' ')
         .map((s) => s[0].toUpperCase() + s.substring(1).toLowerCase())
         .join(' ');
+    final dateParts = dateLabel.split(' ');
+    final weekday = dateParts.last;
+    final datePortion = dateParts.sublist(0, dateParts.length - 1).join(' ');
 
     final textTheme = Theme.of(context).textTheme;
 
@@ -39,10 +43,24 @@ class AgendaCalendarSection extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                dateLabel,
-                style: textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
+              Text.rich(
+                TextSpan(
+                  text: '$datePortion ',
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                  children: [
+                    TextSpan(
+                      text: weekday,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               Row(

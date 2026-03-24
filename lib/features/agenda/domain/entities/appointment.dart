@@ -5,6 +5,7 @@ class Appointment {
     required this.category,
     required this.date,
     required this.timeRange,
+    required this.therapist,
   });
 
   final String id;
@@ -12,4 +13,5 @@ class Appointment {
   final String category;
   final DateTime date;
   final String timeRange;
+  final String therapist;
 }
