@@ -6,7 +6,9 @@ class Routes {
   static const String appointmentDetail = '/agenda/detail';
   static const String patients = '/patients';
   static const String patientDetail = '/patients/detail';
+  static const String therapists = '/therapists';
   static const String dashboard = '/dashboard';
+  static const String settings = '/dashboard/settings';
 
   static String agendaDayPath(DateTime date) {
     final y = date.year;

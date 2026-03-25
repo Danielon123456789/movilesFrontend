@@ -235,6 +235,9 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
         context.go(Routes.patients);
         return;
       case 2:
+        context.go(Routes.therapists);
+        return;
+      case 3:
         context.go(Routes.dashboard);
         return;
     }

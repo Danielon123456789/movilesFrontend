@@ -5,6 +5,8 @@ import '../../features/agenda/presentation/screens/agenda_screen.dart';
 import '../../features/agenda/presentation/screens/appointment_detail_screen.dart';
 import '../../features/agenda/presentation/screens/daily_agenda_screen.dart';
 import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
+import '../../features/settings/presentation/screens/settings_screen.dart';
+import '../../features/therapists/presentation/screens/therapists_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/patients/domain/entities/patient.dart';
@@ -55,8 +57,18 @@ final GoRouter appRouter = GoRouter(
       ],
     ),
     GoRoute(
+      path: Routes.therapists,
+      builder: (context, state) => const TherapistsScreen(),
+    ),
+    GoRoute(
       path: Routes.dashboard,
       builder: (context, state) => const DashboardScreen(),
+      routes: [
+        GoRoute(
+          path: 'settings',
+          builder: (context, state) => const SettingsScreen(),
+        ),
+      ],
     ),
   ],
 );

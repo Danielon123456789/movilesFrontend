@@ -30,6 +30,10 @@ class AppBottomNav extends StatelessWidget {
           label: 'Pacientes',
         ),
         BottomNavigationBarItem(
+          icon: Icon(Icons.account_circle_outlined),
+          label: 'Terapeutas',
+        ),
+        BottomNavigationBarItem(
           icon: Icon(Icons.person_outline),
           label: 'Dashboard',
         ),

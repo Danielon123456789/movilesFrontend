@@ -51,6 +51,19 @@ class PatientsScreen extends ConsumerWidget {
           ],
         ),
       ),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: FloatingActionButton(
+          onPressed: () {
+            // TODO: navigate to create patient
+          },
+          backgroundColor: AppColors.accentBlue,
+          elevation: 4,
+          shape: const CircleBorder(),
+          child: const Icon(Icons.add, color: Colors.white),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: AppBottomNav(
         currentIndex: 1,
         onTap: (index) => _onNavTap(context, index),
@@ -65,6 +78,8 @@ class PatientsScreen extends ConsumerWidget {
       case 1:
         context.go(Routes.patients);
       case 2:
+        context.go(Routes.therapists);
+      case 3:
         context.go(Routes.dashboard);
     }
   }

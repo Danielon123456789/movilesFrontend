@@ -137,6 +137,8 @@ class _DailyAgendaScreenState extends ConsumerState<DailyAgendaScreen> {
       case 1:
         context.go(Routes.patients);
       case 2:
+        context.go(Routes.therapists);
+      case 3:
         context.go(Routes.dashboard);
     }
   }

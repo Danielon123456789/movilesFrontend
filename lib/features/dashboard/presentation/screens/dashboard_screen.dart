@@ -32,7 +32,9 @@ class DashboardScreen extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.md),
                   const _ProfileCard(),
                   const SizedBox(height: AppSpacing.md),
-                  const _SettingsCard(),
+                  _SettingsCard(
+                    onConfigTap: () => context.push(Routes.settings),
+                  ),
                   const SizedBox(height: AppSpacing.md),
                   DashboardMetricCard(
                     label: 'Citas del Mes',
@@ -72,7 +74,7 @@ class DashboardScreen extends ConsumerWidget {
         ),
       ),
       bottomNavigationBar: AppBottomNav(
-        currentIndex: 2,
+        currentIndex: 3,
         onTap: (index) => _onNavTap(context, index),
       ),
     );
@@ -87,6 +89,9 @@ class DashboardScreen extends ConsumerWidget {
         context.go(Routes.patients);
         return;
       case 2:
+        context.go(Routes.therapists);
+        return;
+      case 3:
         context.go(Routes.dashboard);
         return;
     }
@@ -272,7 +277,9 @@ class _InfoRow extends StatelessWidget {
 }
 
 class _SettingsCard extends StatelessWidget {
-  const _SettingsCard();
+  const _SettingsCard({this.onConfigTap});
+
+  final VoidCallback? onConfigTap;
 
   @override
   Widget build(BuildContext context) {
@@ -290,14 +297,18 @@ class _SettingsCard extends StatelessWidget {
           ),
         ],
       ),
-      child: const Column(
+      child: Column(
         children: [
-          _SettingsItem(
+          const _SettingsItem(
             icon: Icons.account_circle_outlined,
             title: 'Profesionales',
           ),
-          Divider(height: 1),
-          _SettingsItem(icon: Icons.shield_outlined, title: 'Configuración'),
+          const Divider(height: 1),
+          _SettingsItem(
+            icon: Icons.shield_outlined,
+            title: 'Configuración',
+            onTap: onConfigTap,
+          ),
         ],
       ),
     );
@@ -305,15 +316,16 @@ class _SettingsCard extends StatelessWidget {
 }
 
 class _SettingsItem extends StatelessWidget {
-  const _SettingsItem({required this.icon, required this.title});
+  const _SettingsItem({required this.icon, required this.title, this.onTap});
 
   final IconData icon;
   final String title;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {},
+      onTap: onTap ?? () {},
       borderRadius: BorderRadius.circular(24),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
