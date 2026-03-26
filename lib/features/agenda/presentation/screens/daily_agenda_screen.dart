@@ -11,6 +11,7 @@ import '../controllers/agenda_controller.dart';
 import '../widgets/agenda_day_detail_header.dart';
 import '../widgets/agenda_timeline.dart';
 import '../widgets/agenda_week_strip.dart';
+import '../widgets/create_appointment_modal.dart';
 
 class DailyAgendaScreen extends ConsumerStatefulWidget {
   const DailyAgendaScreen({
@@ -113,9 +114,8 @@ class _DailyAgendaScreenState extends ConsumerState<DailyAgendaScreen> {
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 8),
         child: FloatingActionButton(
-          onPressed: () {
-            // TODO: navigate to create appointment
-          },
+          onPressed: () =>
+              _showCreateAppointmentModal(context, state.selectedDate),
           backgroundColor: AppColors.accentBlue,
           elevation: 4,
           shape: const CircleBorder(),
@@ -141,5 +141,20 @@ class _DailyAgendaScreenState extends ConsumerState<DailyAgendaScreen> {
       case 3:
         context.go(Routes.dashboard);
     }
+  }
+
+  static Future<void> _showCreateAppointmentModal(
+    BuildContext context,
+    DateTime selectedDate,
+  ) {
+    return showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.cardSurface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => CreateAppointmentModal(initialDate: selectedDate),
+    );
   }
 }

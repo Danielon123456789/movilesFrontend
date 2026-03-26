@@ -8,6 +8,7 @@ import '../../../../app/router/routes.dart';
 import '../../../../shared/widgets/app_bottom_nav.dart';
 import '../controllers/patients_controller.dart';
 import '../widgets/patient_card.dart';
+import '../widgets/create_patient_modal.dart';
 import '../widgets/patients_header.dart';
 import '../widgets/patients_search_field.dart';
 import '../widgets/patients_summary_row.dart';
@@ -54,10 +55,8 @@ class PatientsScreen extends ConsumerWidget {
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 8),
         child: FloatingActionButton(
-          onPressed: () {
-            // TODO: navigate to create patient
-          },
-          backgroundColor: AppColors.accentBlue,
+          onPressed: () => _showCreatePatientModal(context, ref),
+          backgroundColor: AppColors.chipActiveFg,
           elevation: 4,
           shape: const CircleBorder(),
           child: const Icon(Icons.add, color: Colors.white),
@@ -153,6 +152,37 @@ class PatientsScreen extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+
+  static Future<void> _showCreatePatientModal(
+    BuildContext context,
+    WidgetRef ref,
+  ) {
+    return showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.cardSurface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetContext) => CreatePatientModal(
+        onSubmit: (data) {
+          ref.read(patientsControllerProvider.notifier).addPatient(
+                name: data.name,
+                serviceLabel: data.service,
+              );
+
+          Navigator.of(sheetContext).pop();
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: AppColors.chipActiveFg,
+              content: Text('Paciente "${data.name}" creado'),
+            ),
+          );
+        },
+      ),
     );
   }
 }
