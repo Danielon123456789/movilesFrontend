@@ -108,9 +108,6 @@ class _CreatePatientModalState extends State<CreatePatientModal> {
                     if (phone.isEmpty) {
                       return 'Ingresa el teléfono del tutor';
                     }
-                    if (phone.length < 8) {
-                      return 'Teléfono no válido';
-                    }
                     return null;
                   },
                 ),
@@ -125,10 +122,6 @@ class _CreatePatientModalState extends State<CreatePatientModal> {
                     final email = value?.trim() ?? '';
                     if (email.isEmpty) {
                       return 'Ingresa el correo del tutor';
-                    }
-                    final regex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
-                    if (!regex.hasMatch(email)) {
-                      return 'Correo no válido';
                     }
                     return null;
                   },

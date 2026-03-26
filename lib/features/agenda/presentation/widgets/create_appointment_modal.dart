@@ -17,6 +17,8 @@ class CreateAppointmentModal extends StatefulWidget {
 }
 
 class _CreateAppointmentModalState extends State<CreateAppointmentModal> {
+  static const _pendingMessage = 'Este botón creará una nueva cita en la agenda.';
+
   final _durationController = TextEditingController();
   final _notesController = TextEditingController();
 
@@ -147,6 +149,9 @@ class _CreateAppointmentModalState extends State<CreateAppointmentModal> {
                 height: 50,
                 child: ElevatedButton(
                   onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text(_pendingMessage)),
+                    );
                     Navigator.of(context).pop();
                   },
                   style: ElevatedButton.styleFrom(

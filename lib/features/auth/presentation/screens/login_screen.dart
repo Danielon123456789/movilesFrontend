@@ -52,14 +52,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         borderRadius: BorderRadius.circular(18),
                       ),
                       child: const Icon(
-                        Icons.check_circle_outline,
+                        Icons.shield_outlined,
                         color: Colors.white,
                         size: 42,
                       ),
                     ),
                     const SizedBox(width: 14),
                     const Text(
-                      'AgendaPro',
+                      'Sanctum',
                       style: TextStyle(
                         fontSize: 30,
                         fontWeight: FontWeight.w600,
@@ -80,8 +80,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: AppSpacing.sm),
                 Text(
                   _isSignUp
-                      ? 'Crea tu cuenta para comenzar a utilizar AgendaPro'
-                      : 'Inicia sesión en tu cuenta de AgendaPro',
+                      ? 'Crea tu cuenta para comenzar a utilizar Sanctum'
+                      : 'Inicia sesión en tu cuenta de Sanctum',
                   style: const TextStyle(
                     fontSize: 17,
                     height: 1.25,

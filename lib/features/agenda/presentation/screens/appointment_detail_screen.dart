@@ -10,6 +10,8 @@ class AppointmentDetailScreen extends StatelessWidget {
 
   final Appointment appointment;
 
+  static const _pendingMessage = 'Este botón permitirá editar la cita actual.';
+
   static const _mockTreatment =
       'El paciente muestra una evolución favorable. '
       'Se han completado los objetivos de la sesión anterior con éxito. '
@@ -91,9 +93,13 @@ class AppointmentDetailScreen extends StatelessWidget {
                 ),
               ),
             ),
-            _BottomButton(onPressed: () {
-              // TODO: navigate to session progress
-            }),
+            _BottomButton(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text(_pendingMessage)),
+                );
+              },
+            ),
           ],
         ),
       ),

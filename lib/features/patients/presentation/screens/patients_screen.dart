@@ -16,6 +16,8 @@ import '../widgets/patients_summary_row.dart';
 class PatientsScreen extends ConsumerWidget {
   const PatientsScreen({super.key});
 
+  static const _pendingMessage = 'Este botón guardará el nuevo paciente en la base de datos.';
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final patients = ref.watch(filteredPatientsProvider);
@@ -176,9 +178,8 @@ class PatientsScreen extends ConsumerWidget {
           Navigator.of(sheetContext).pop();
 
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              backgroundColor: AppColors.chipActiveFg,
-              content: Text('Paciente "${data.name}" creado'),
+            const SnackBar(
+              content: Text(_pendingMessage),
             ),
           );
         },
