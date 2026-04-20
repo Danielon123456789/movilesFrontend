@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/routes.dart';
 import '../../../../app/theme/app_spacing.dart';
+import '../controllers/auth_controller.dart';
+import '../controllers/auth_state.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -28,6 +31,23 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authControllerProvider);
+
+    ref.listen<AuthState>(authControllerProvider, (prev, next) {
+      if (next.errorMessage != null && next.errorMessage != prev?.errorMessage) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(next.errorMessage!)),
+        );
+      }
+
+      final shouldNavigate = next.user != null &&
+          !next.isLoading &&
+          (prev?.user == null || prev?.isLoading == true);
+      if (shouldNavigate) {
+        context.go(Routes.agenda);
+      }
+    });
+
     const bgColor = Color(0xFFF3F4F6);
     const brandBlue = Color(0xFF6677F0);
 
@@ -166,7 +186,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: () => _submit('secretary'),
+                    onPressed: authState.isLoading ? null : _submit,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: brandBlue,
                       foregroundColor: Colors.white,
@@ -226,12 +246,23 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void _submit(String role) {
-    debugPrint('role=$role');
-    debugPrint('name=${_nameController.text}');
-    debugPrint('email=${_emailController.text}');
-    debugPrint('password=${_passwordController.text}');
-    context.go(Routes.agenda);
+  void _submit() {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Ingresa tu correo y contraseña.')),
+      );
+      return;
+    }
+
+    final notifier = ref.read(authControllerProvider.notifier);
+    if (_isSignUp) {
+      notifier.register(email, password);
+    } else {
+      notifier.login(email, password);
+    }
   }
 }
 

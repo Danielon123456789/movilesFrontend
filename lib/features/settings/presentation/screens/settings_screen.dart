@@ -6,7 +6,8 @@ import '../../../../app/theme/app_spacing.dart';
 import '../controllers/settings_controller.dart';
 import '../widgets/create_treatment_modal.dart';
 
-const _pendingMessage = 'Este interruptor cambiará la apariencia de la app a modo oscuro.';
+const _pendingMessage =
+    'Este interruptor cambiará la apariencia de la app a modo oscuro.';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -53,7 +54,10 @@ class SettingsScreen extends ConsumerWidget {
                       reminderHours: state.reminderHours,
                       onReminderChanged: notifier.setReminderHours,
                     ),
-                    const Divider(height: AppSpacing.xl * 2, color: AppColors.divider),
+                    const Divider(
+                      height: AppSpacing.xl * 2,
+                      color: AppColors.divider,
+                    ),
                     _TreatmentsSection(
                       treatments: state.treatments,
                       onAdd: () => _showCreateTreatmentModal(context, notifier),
@@ -193,11 +197,11 @@ class _DarkModeSection extends StatelessWidget {
         Switch(
           value: false,
           onChanged: (_) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text(_pendingMessage)),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text(_pendingMessage)));
           },
-          activeColor: AppColors.accentBlue,
+          activeThumbColor: AppColors.accentBlue,
         ),
       ],
     );
@@ -420,7 +424,9 @@ class _TreatmentExpansionTile extends StatelessWidget {
             onTap: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Funcionalidad para editar tratamiento pendiente.'),
+                  content: Text(
+                    'Funcionalidad para editar tratamiento pendiente.',
+                  ),
                 ),
               );
             },
@@ -434,7 +440,9 @@ class _TreatmentExpansionTile extends StatelessWidget {
             onTap: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Funcionalidad para eliminar tratamiento pendiente.'),
+                  content: Text(
+                    'Funcionalidad para eliminar tratamiento pendiente.',
+                  ),
                 ),
               );
             },
