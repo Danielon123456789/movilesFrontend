@@ -29,7 +29,10 @@ class SettingsScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const _DarkModeSection(),
-                    const Divider(height: AppSpacing.xl * 2, color: AppColors.divider),
+                    const Divider(
+                      height: AppSpacing.xl * 2,
+                      color: AppColors.divider,
+                    ),
                     _GeneralSection(
                       duration: state.defaultDuration,
                       onDurationChanged: (v) {
@@ -37,14 +40,20 @@ class SettingsScreen extends ConsumerWidget {
                         if (parsed != null) notifier.setDefaultDuration(parsed);
                       },
                     ),
-                    const Divider(height: AppSpacing.xl * 2, color: AppColors.divider),
+                    const Divider(
+                      height: AppSpacing.xl * 2,
+                      color: AppColors.divider,
+                    ),
                     _NotificationsSection(
                       enabled: state.notificationsEnabled,
                       onToggle: notifier.toggleNotifications,
                       reminderHours: state.reminderHours,
                       onReminderChanged: notifier.setReminderHours,
                     ),
-                    const Divider(height: AppSpacing.xl * 2, color: AppColors.divider),
+                    const Divider(
+                      height: AppSpacing.xl * 2,
+                      color: AppColors.divider,
+                    ),
                     _TreatmentsSection(treatments: state.treatments),
                     const SizedBox(height: AppSpacing.xl),
                   ],
@@ -70,9 +79,7 @@ class _Header extends StatelessWidget {
         horizontal: AppSpacing.xs,
         vertical: AppSpacing.sm,
       ),
-      decoration: const BoxDecoration(
-        color: AppColors.accentBlue,
-      ),
+      decoration: const BoxDecoration(color: AppColors.accentBlue),
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -130,7 +137,11 @@ class _DarkModeSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const Icon(Icons.dark_mode_outlined, size: 22, color: AppColors.textPrimary),
+        const Icon(
+          Icons.dark_mode_outlined,
+          size: 22,
+          color: AppColors.textPrimary,
+        ),
         const SizedBox(width: AppSpacing.sm),
         const Expanded(
           child: Column(
@@ -159,7 +170,7 @@ class _DarkModeSection extends StatelessWidget {
         Switch(
           value: false,
           onChanged: (_) {},
-          activeColor: AppColors.accentBlue,
+          activeThumbColor: AppColors.accentBlue,
         ),
       ],
     );
@@ -253,7 +264,7 @@ class _NotificationsSection extends StatelessWidget {
             Switch(
               value: enabled,
               onChanged: onToggle,
-              activeColor: AppColors.accentBlue,
+              activeThumbColor: AppColors.accentBlue,
             ),
           ],
         ),
@@ -289,8 +300,11 @@ class _TreatmentsSection extends StatelessWidget {
       children: [
         Row(
           children: [
-            const Icon(Icons.medical_services_outlined,
-                size: 22, color: AppColors.textPrimary),
+            const Icon(
+              Icons.medical_services_outlined,
+              size: 22,
+              color: AppColors.textPrimary,
+            ),
             const SizedBox(width: AppSpacing.sm),
             const Expanded(
               child: Text(
@@ -381,11 +395,7 @@ class _TreatmentTile extends StatelessWidget {
               ],
             ),
           ),
-          const Icon(
-            Icons.chevron_right,
-            color: AppColors.textMuted,
-            size: 22,
-          ),
+          const Icon(Icons.chevron_right, color: AppColors.textMuted, size: 22),
         ],
       ),
     );
