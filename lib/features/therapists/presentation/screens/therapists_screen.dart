@@ -9,9 +9,12 @@ import '../../../../shared/widgets/app_bottom_nav.dart';
 import '../../../../shared/widgets/app_screen_header.dart';
 import '../controllers/therapists_controller.dart';
 import '../widgets/therapist_card.dart';
+import '../widgets/create_therapist_modal.dart';
 
 class TherapistsScreen extends ConsumerWidget {
   const TherapistsScreen({super.key});
+
+  static const _pendingMessage = 'Este botón abrirá un formulario para crear un nuevo terapeuta.';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -60,9 +63,7 @@ class TherapistsScreen extends ConsumerWidget {
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 8),
         child: FloatingActionButton(
-          onPressed: () {
-            // TODO: navigate to create therapist
-          },
+          onPressed: () => _showCreateTherapistModal(context),
           backgroundColor: AppColors.accentBlue,
           elevation: 4,
           shape: const CircleBorder(),
@@ -73,6 +74,27 @@ class TherapistsScreen extends ConsumerWidget {
       bottomNavigationBar: AppBottomNav(
         currentIndex: 2,
         onTap: (index) => _onNavTap(context, index),
+      ),
+    );
+  }
+
+  Future<void> _showCreateTherapistModal(BuildContext context) {
+    return showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.cardSurface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetContext) => CreateTherapistModal(
+        onSubmit: (data) {
+          Navigator.of(sheetContext).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Este botón creará un terapeuta'),
+            ),
+          );
+        },
       ),
     );
   }

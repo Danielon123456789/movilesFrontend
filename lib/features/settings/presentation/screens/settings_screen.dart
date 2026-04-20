@@ -4,6 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../controllers/settings_controller.dart';
+import '../widgets/create_treatment_modal.dart';
+
+const _pendingMessage = 'Este interruptor cambiará la apariencia de la app a modo oscuro.';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -50,11 +53,11 @@ class SettingsScreen extends ConsumerWidget {
                       reminderHours: state.reminderHours,
                       onReminderChanged: notifier.setReminderHours,
                     ),
-                    const Divider(
-                      height: AppSpacing.xl * 2,
-                      color: AppColors.divider,
+                    const Divider(height: AppSpacing.xl * 2, color: AppColors.divider),
+                    _TreatmentsSection(
+                      treatments: state.treatments,
+                      onAdd: () => _showCreateTreatmentModal(context, notifier),
                     ),
-                    _TreatmentsSection(treatments: state.treatments),
                     const SizedBox(height: AppSpacing.xl),
                   ],
                 ),
@@ -65,6 +68,26 @@ class SettingsScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+void _showCreateTreatmentModal(
+  BuildContext context,
+  SettingsController notifier,
+) {
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: AppColors.cardSurface,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    ),
+    builder: (sheetContext) => CreateTreatmentModal(
+      onSubmit: (name) {
+        notifier.addTreatment(name);
+        Navigator.of(sheetContext).pop();
+      },
+    ),
+  );
 }
 
 class _Header extends StatelessWidget {
@@ -169,8 +192,12 @@ class _DarkModeSection extends StatelessWidget {
         ),
         Switch(
           value: false,
-          onChanged: (_) {},
-          activeThumbColor: AppColors.accentBlue,
+          onChanged: (_) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text(_pendingMessage)),
+            );
+          },
+          activeColor: AppColors.accentBlue,
         ),
       ],
     );
@@ -289,9 +316,10 @@ class _NotificationsSection extends StatelessWidget {
 }
 
 class _TreatmentsSection extends StatelessWidget {
-  const _TreatmentsSection({required this.treatments});
+  const _TreatmentsSection({required this.treatments, required this.onAdd});
 
   final List<Treatment> treatments;
+  final VoidCallback onAdd;
 
   @override
   Widget build(BuildContext context) {
@@ -316,24 +344,16 @@ class _TreatmentsSection extends StatelessWidget {
                 ),
               ),
             ),
-            GestureDetector(
-              onTap: () {
-                // TODO: open create treatment flow
-              },
-              child: const Text(
-                '+ Nuevo',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.accentBlue,
-                ),
-              ),
+            TextButton.icon(
+              onPressed: onAdd,
+              icon: const Icon(Icons.add, size: 18),
+              label: const Text('Nuevo'),
             ),
           ],
         ),
         const SizedBox(height: AppSpacing.md),
         for (final t in treatments) ...[
-          _TreatmentTile(treatment: t),
+          _TreatmentExpansionTile(treatment: t),
           const SizedBox(height: AppSpacing.sm),
         ],
       ],
@@ -341,62 +361,118 @@ class _TreatmentsSection extends StatelessWidget {
   }
 }
 
-class _TreatmentTile extends StatelessWidget {
-  const _TreatmentTile({required this.treatment});
+class _TreatmentExpansionTile extends StatelessWidget {
+  const _TreatmentExpansionTile({required this.treatment});
 
   final Treatment treatment;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.md,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.cardSurface,
-        borderRadius: BorderRadius.circular(14),
-        border: const Border.fromBorderSide(
-          BorderSide(color: AppColors.subtleBorder),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(14),
+      child: ExpansionTile(
+        collapsedBackgroundColor: AppColors.cardSurface,
+        backgroundColor: AppColors.cardSurface,
+        shape: const Border(),
+        title: Row(
+          children: [
+            Container(
+              width: 14,
+              height: 14,
+              decoration: BoxDecoration(
+                color: treatment.color,
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    treatment.name,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${treatment.durationMinutes} min',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
-      ),
-      child: Row(
         children: [
-          Container(
-            width: 14,
-            height: 14,
-            decoration: BoxDecoration(
-              color: treatment.color,
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  treatment.name,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
+          const Divider(height: 1, color: AppColors.subtleBorder),
+          _buildOption(
+            context,
+            icon: Icons.edit_outlined,
+            text: 'Editar',
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Funcionalidad para editar tratamiento pendiente.'),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  '${treatment.durationMinutes} min',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.textMuted,
-                  ),
-                ),
-              ],
-            ),
+              );
+            },
           ),
-          const Icon(Icons.chevron_right, color: AppColors.textMuted, size: 22),
+          const Divider(height: 1, color: AppColors.subtleBorder),
+          _buildOption(
+            context,
+            icon: Icons.delete_outline,
+            text: 'Eliminar',
+            color: AppColors.error,
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Funcionalidad para eliminar tratamiento pendiente.'),
+                ),
+              );
+            },
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildOption(
+    BuildContext context, {
+    required IconData icon,
+    required String text,
+    required VoidCallback onTap,
+    Color? color,
+  }) {
+    final optionColor = color ?? AppColors.textPrimary;
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: optionColor, size: 20),
+            const SizedBox(width: AppSpacing.sm),
+            Text(
+              text,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: optionColor,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

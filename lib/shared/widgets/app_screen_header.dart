@@ -60,6 +60,9 @@ class AppScreenHeader extends StatelessWidget {
 class _NotificationButton extends StatelessWidget {
   const _NotificationButton();
 
+  static const _pendingMessage =
+      'Funcionalidad para mostrar notificaciones pendientes.';
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -70,7 +73,11 @@ class _NotificationButton extends StatelessWidget {
           shape: const CircleBorder(),
           child: InkWell(
             customBorder: const CircleBorder(),
-            onTap: () {},
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text(_pendingMessage)),
+              );
+            },
             child: const Padding(
               padding: EdgeInsets.all(AppSpacing.sm),
               child: Icon(Icons.notifications_none, color: Colors.white),

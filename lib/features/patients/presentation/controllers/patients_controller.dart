@@ -74,6 +74,23 @@ class PatientsController extends Notifier<PatientsState> {
   void setFilter(PatientsFilter value) {
     state = state.copyWith(filter: value);
   }
+
+  void addPatient({
+    required String name,
+    required String serviceLabel,
+  }) {
+    final patient = Patient(
+      id: DateTime.now().microsecondsSinceEpoch.toString(),
+      name: name,
+      daysLabel: 'Por asignar',
+      serviceLabel: serviceLabel,
+      isActive: true,
+    );
+
+    state = state.copyWith(
+      patients: [patient, ...state.patients],
+    );
+  }
 }
 
 final patientsControllerProvider =

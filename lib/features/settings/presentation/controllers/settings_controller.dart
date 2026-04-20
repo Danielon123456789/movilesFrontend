@@ -84,6 +84,17 @@ class SettingsController extends Notifier<SettingsState> {
   void setReminderHours(String value) {
     state = state.copyWith(reminderHours: value);
   }
+
+  void addTreatment(String name) {
+    final newTreatment = Treatment(
+      name: name,
+      durationMinutes: 60, // Default duration
+      color: Colors.primaries[state.treatments.length % Colors.primaries.length],
+    );
+    state = state.copyWith(
+      treatments: [...state.treatments, newTreatment],
+    );
+  }
 }
 
 final settingsControllerProvider =

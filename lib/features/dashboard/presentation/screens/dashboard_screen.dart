@@ -299,9 +299,10 @@ class _SettingsCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          const _SettingsItem(
+          _SettingsItem(
             icon: Icons.account_circle_outlined,
             title: 'Profesionales',
+            onTap: () => context.go(Routes.therapists),
           ),
           const Divider(height: 1),
           _SettingsItem(
