@@ -7,6 +7,7 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../shared/widgets/app_bottom_nav.dart';
 import '../../../../shared/widgets/app_screen_header.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../controllers/dashboard_controller.dart';
 import '../widgets/dashboard_metric_card.dart';
 
@@ -65,7 +66,26 @@ class DashboardScreen extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.md),
                   const _PendientesSection(),
                   const SizedBox(height: AppSpacing.md),
-                  _LogoutCard(onTap: () => context.go(Routes.login)),
+                  _LogoutCard(
+                    onTap: () async {
+                      try {
+                        await ref
+                            .read(authControllerProvider.notifier)
+                            .logout();
+                        if (context.mounted) {
+                          context.go(Routes.login);
+                        }
+                      } catch (_) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('No se pudo cerrar sesión.'),
+                            ),
+                          );
+                        }
+                      }
+                    },
+                  ),
                   const SizedBox(height: AppSpacing.md),
                 ],
               ),

@@ -12,7 +12,28 @@
           "package_name": "com.example.agenda"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "880820246406-13lr2ntb2bj58b1s4m0gvkvbo8p2es1a.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.agenda",
+            "certificate_hash": "62d12dfc7612c26d68c4fd087f57fb8ee65f92e1"
+          }
+        },
+        {
+          "client_id": "880820246406-g5o78d629lpn61it7i8vsl8h8ilp28ab.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.agenda",
+            "certificate_hash": "eb0900944c49d2393b801286fefa70940587e549"
+          }
+        },
+        {
+          "client_id": "880820246406-1sd6clk1bkjbhe4sug4ru82fqbteodht.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCUorwo3kvfs_Vhifk_xf9iKLEMrTXTQYU"
@@ -20,7 +41,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "880820246406-1sd6clk1bkjbhe4sug4ru82fqbteodht.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "880820246406-p5dbtlbv6t0o594pphm49bo11mqf8sev.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.agenda"
+              }
+            }
+          ]
         }
       }
     }
