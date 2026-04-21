@@ -34,13 +34,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final authState = ref.watch(authControllerProvider);
 
     ref.listen<AuthState>(authControllerProvider, (prev, next) {
-      if (next.errorMessage != null && next.errorMessage != prev?.errorMessage) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(next.errorMessage!)),
-        );
+      if (next.errorMessage != null &&
+          next.errorMessage != prev?.errorMessage) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(next.errorMessage!)));
       }
 
-      final shouldNavigate = next.user != null &&
+      final shouldNavigate =
+          next.user != null &&
           !next.isLoading &&
           (prev?.user == null || prev?.isLoading == true);
       if (shouldNavigate) {
@@ -203,6 +205,44 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.md),
+                Row(
+                  children: const [
+                    Expanded(child: Divider(color: Color(0xFFD9DDE4))),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 12),
+                      child: Text(
+                        'o',
+                        style: TextStyle(
+                          color: Color(0xFF6B7280),
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                    Expanded(child: Divider(color: Color(0xFFD9DDE4))),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.md),
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: OutlinedButton.icon(
+                    onPressed: authState.isLoading ? null : _submitGoogle,
+                    icon: const Icon(Icons.g_mobiledata, size: 28),
+                    label: const Text('Continuar con Google'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFF0B1B34),
+                      side: const BorderSide(color: Color(0xFFD9DDE4)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      textStyle: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
                 Center(
                   child: Wrap(
                     crossAxisAlignment: WrapCrossAlignment.center,
@@ -263,6 +303,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     } else {
       notifier.login(email, password);
     }
+  }
+
+  void _submitGoogle() {
+    ref.read(authControllerProvider.notifier).loginWithGoogle();
   }
 }
 
