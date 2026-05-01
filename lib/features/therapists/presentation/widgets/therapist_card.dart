@@ -9,14 +9,22 @@ class TherapistCard extends StatelessWidget {
     super.key,
     required this.therapist,
     this.onTap,
+    this.onMenuEdit,
+    this.onMenuDelete,
   });
 
   final Therapist therapist;
   final VoidCallback? onTap;
 
+  /// Menú ⋮ superior derecha. Si ambos son null, no se muestra el botón.
+  final VoidCallback? onMenuEdit;
+  final VoidCallback? onMenuDelete;
+
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+
+    final hasMenu = onMenuEdit != null || onMenuDelete != null;
 
     return GestureDetector(
       onTap: onTap,
@@ -46,11 +54,61 @@ class TherapistCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _TherapistIdentity(therapist: therapist),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: _TherapistIdentity(therapist: therapist)),
+                if (hasMenu)
+                  PopupMenuButton<String>(
+                    padding: const EdgeInsets.only(top: 8, right: 4),
+                    splashRadius: 26,
+                    iconSize: 28,
+                    icon: Icon(
+                      Icons.more_vert,
+                      color: AppColors.textMuted,
+                      size: 28,
+                    ),
+                    offset: const Offset(0, 6),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    color: AppColors.cardSurface,
+                    elevation: 2,
+                    itemBuilder: (context) => [
+                      if (onMenuEdit != null)
+                        const PopupMenuItem<String>(
+                          value: 'edit',
+                          child: Text('Editar'),
+                        ),
+                      if (onMenuDelete != null)
+                        PopupMenuItem<String>(
+                          value: 'delete',
+                          child: Text(
+                            'Eliminar',
+                            style: TextStyle(color: AppColors.error),
+                          ),
+                        ),
+                    ],
+                    onSelected: (value) {
+                      switch (value) {
+                        case 'edit':
+                          onMenuEdit?.call();
+                          break;
+                        case 'delete':
+                          onMenuDelete?.call();
+                          break;
+                      }
+                    },
+                  ),
+              ],
+            ),
             const SizedBox(height: AppSpacing.md),
             _EmailRow(email: therapist.email),
             const SizedBox(height: AppSpacing.md),
-            _ScheduleSection(schedule: therapist.schedule, textTheme: textTheme),
+            _ScheduleSection(
+              schedule: therapist.schedule,
+              textTheme: textTheme,
+            ),
           ],
         ),
       ),
@@ -116,18 +174,14 @@ class _EmailRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(
-          Icons.mail_outline,
-          size: 18,
-          color: AppColors.textMuted,
-        ),
+        Icon(Icons.mail_outline, size: 18, color: AppColors.textMuted),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: Text(
             email,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textPrimary,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -137,10 +191,7 @@ class _EmailRow extends StatelessWidget {
 }
 
 class _ScheduleSection extends StatelessWidget {
-  const _ScheduleSection({
-    required this.schedule,
-    required this.textTheme,
-  });
+  const _ScheduleSection({required this.schedule, required this.textTheme});
 
   final List<TherapistSchedule> schedule;
   final TextTheme textTheme;

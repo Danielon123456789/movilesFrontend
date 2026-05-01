@@ -4,10 +4,7 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 
 class CreateTreatmentModal extends StatefulWidget {
-  const CreateTreatmentModal({
-    super.key,
-    required this.onSubmit,
-  });
+  const CreateTreatmentModal({super.key, required this.onSubmit});
 
   final ValueChanged<String> onSubmit;
 

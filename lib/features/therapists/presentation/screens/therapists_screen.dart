@@ -5,16 +5,17 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/router/routes.dart';
+import '../../../../shared/dialogs/confirm_delete_dialog.dart';
 import '../../../../shared/widgets/app_bottom_nav.dart';
 import '../../../../shared/widgets/app_screen_header.dart';
+import '../../domain/entities/therapist.dart';
 import '../controllers/therapists_controller.dart';
 import '../widgets/therapist_card.dart';
 import '../widgets/create_therapist_modal.dart';
+import '../widgets/therapists_summary_row.dart';
 
 class TherapistsScreen extends ConsumerWidget {
   const TherapistsScreen({super.key});
-
-  static const _pendingMessage = 'Este botón abrirá un formulario para crear un nuevo terapeuta.';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -37,22 +38,22 @@ class TherapistsScreen extends ConsumerWidget {
                         .read(therapistsControllerProvider.notifier)
                         .setQuery(value),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.md,
-                      AppSpacing.sm,
-                      AppSpacing.md,
-                      AppSpacing.sm,
-                    ),
-                    child: Text(
-                      '${therapists.length} terapeutas',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleSmall
-                          ?.copyWith(fontWeight: FontWeight.w700),
-                    ),
+                  TherapistsSummaryRow(
+                    countLabel: '${therapists.length} terapeutas',
+                    onTreatmentsTap: () =>
+                        context.push(Routes.therapistsTreatments),
                   ),
-                  for (final t in therapists) TherapistCard(therapist: t),
+                  for (final t in therapists)
+                    TherapistCard(
+                      therapist: t,
+                      onMenuEdit: () {
+                        debugPrint(
+                          '[TherapistCard] editar id=${t.id} nombre=${t.name}',
+                        );
+                      },
+                      onMenuDelete: () =>
+                          _confirmRemoveTherapist(context, ref, t),
+                    ),
                   const SizedBox(height: AppSpacing.lg),
                 ],
               ),
@@ -78,6 +79,29 @@ class TherapistsScreen extends ConsumerWidget {
     );
   }
 
+  static Future<void> _confirmRemoveTherapist(
+    BuildContext context,
+    WidgetRef ref,
+    Therapist therapist,
+  ) async {
+    final ok = await showConfirmDeleteDialog(
+      context,
+      title: 'Eliminar terapeuta',
+      body:
+          '¿Seguro que deseas eliminar de la lista a "${therapist.name}"? '
+          'Solo se quitará de la vista actual hasta integrar servidor.',
+    );
+    if (!ok || !context.mounted) return;
+
+    ref
+        .read(therapistsControllerProvider.notifier)
+        .removeTherapist(therapist.id);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Terapeuta eliminado de la lista actual.')),
+    );
+  }
+
   Future<void> _showCreateTherapistModal(BuildContext context) {
     return showModalBottomSheet<void>(
       context: context,
@@ -90,9 +114,7 @@ class TherapistsScreen extends ConsumerWidget {
         onSubmit: (data) {
           Navigator.of(sheetContext).pop();
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Este botón creará un terapeuta'),
-            ),
+            const SnackBar(content: Text('Este botón creará un terapeuta')),
           );
         },
       ),

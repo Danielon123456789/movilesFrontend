@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
+import '../../../../shared/widgets/swipe_actions_row.dart';
 import '../../domain/entities/appointment.dart';
 
 const int _startHour = 7;
@@ -16,25 +17,32 @@ class AgendaTimeline extends StatelessWidget {
     required this.showCurrentTimeIndicator,
     this.appointments = const [],
     this.onAppointmentTap,
+    required this.onAppointmentDelete,
+    this.agendaSwipeGroupTag = 'agenda_day_timeline',
   });
 
   final bool showCurrentTimeIndicator;
   final List<Appointment> appointments;
   final ValueChanged<Appointment>? onAppointmentTap;
+  final ValueChanged<Appointment> onAppointmentDelete;
+
+  /// Grupo opcional para [SlidableAutoCloseBehavior] desde la pantalla contenedora.
+  final Object? agendaSwipeGroupTag;
 
   @override
   Widget build(BuildContext context) {
-    final hourHeight =
-        appointments.isNotEmpty ? _hourHeightExpanded : _hourHeightCompact;
+    final hourHeight = appointments.isNotEmpty
+        ? _hourHeightExpanded
+        : _hourHeightCompact;
     final now = DateTime.now();
     final textTheme = Theme.of(context).textTheme;
 
     final currentHourFraction = now.hour + now.minute / 60;
-    final showCurrentTime = showCurrentTimeIndicator &&
+    final showCurrentTime =
+        showCurrentTimeIndicator &&
         currentHourFraction >= _startHour &&
         currentHourFraction < _endHour;
-    final currentTimeOffset =
-        (currentHourFraction - _startHour) * hourHeight;
+    final currentTimeOffset = (currentHourFraction - _startHour) * hourHeight;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -65,9 +73,9 @@ class AgendaTimeline extends StatelessWidget {
                                 child: Text(
                                   '${(h % 24).toString().padLeft(2, '0')}:00',
                                   style: textTheme.bodyMedium?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
                                   ),
                                 ),
                               ),
@@ -78,10 +86,7 @@ class AgendaTimeline extends StatelessWidget {
                   ),
                   Expanded(
                     child: CustomPaint(
-                      size: Size(
-                        constraints.maxWidth - 56,
-                        contentHeight,
-                      ),
+                      size: Size(constraints.maxWidth - 56, contentHeight),
                       painter: _GridLinePainter(hourHeight: hourHeight),
                     ),
                   ),
@@ -124,10 +129,7 @@ class AgendaTimeline extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildAppointmentOverlay(
-    Appointment appt,
-    double hourHeight,
-  ) {
+  List<Widget> _buildAppointmentOverlay(Appointment appt, double hourHeight) {
     final (startTime, _) = _parseTimeRange(appt.timeRange);
 
     final slotStart = startTime.floor();
@@ -152,11 +154,22 @@ class AgendaTimeline extends StatelessWidget {
         left: 60,
         right: 4,
         height: height,
-        child: GestureDetector(
-          onTap: onAppointmentTap != null ? () => onAppointmentTap!(appt) : null,
-          child: _TimelineAppointmentCard(
-            appointment: appt,
-            displayTimeRange: label,
+        child: SwipeActionsRow(
+          key: ValueKey('timeline_${appt.id}'),
+          groupTag: agendaSwipeGroupTag,
+          onEdit: () {
+            if (onAppointmentTap != null) onAppointmentTap!(appt);
+          },
+          onDelete: () => onAppointmentDelete(appt),
+          child: GestureDetector(
+            onTap: onAppointmentTap != null
+                ? () => onAppointmentTap!(appt)
+                : null,
+            behavior: HitTestBehavior.opaque,
+            child: _TimelineAppointmentCard(
+              appointment: appt,
+              displayTimeRange: label,
+            ),
           ),
         ),
       ),

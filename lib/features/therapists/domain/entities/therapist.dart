@@ -1,8 +1,5 @@
 class TherapistSchedule {
-  const TherapistSchedule({
-    required this.day,
-    required this.timeRange,
-  });
+  const TherapistSchedule({required this.day, required this.timeRange});
 
   final String day;
   final String timeRange;

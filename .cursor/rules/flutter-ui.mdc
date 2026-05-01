@@ -1,0 +1,149 @@
+---
+alwaysApply: true
+---
+
+# Flutter UI
+
+## Objetivo
+
+Implementar interfaces consistentes, predecibles y fieles al diseño, evitando interpretaciones y variaciones visuales innecesarias.
+
+---
+
+## Uso de tokens
+
+- Usar tokens centralizados para:
+  - colores
+  - tipografías
+  - espaciados
+  - radios
+  - sombras
+
+- No hardcodear valores si existe un token equivalente
+- Si un valor no existe, considerar agregarlo al sistema de diseño
+
+---
+
+## Fidelidad al diseño (CRÍTICO)
+
+- No reinterpretar el diseño
+- No “aproximar” visualmente
+- Replicar layout, spacing, tamaños y jerarquía lo más fiel posible
+
+Si existen specs (ej: Figma):
+
+- usar valores exactos (px, fontSize, spacing)
+- no sustituir con valores “similares”
+
+---
+
+## Uso de specs (Figma)
+
+- Priorizar siempre valores obtenidos de Figma
+- Extraer:
+  - tamaños
+  - spacing
+  - tipografía
+  - layout
+
+- No adivinar medidas
+- No usar valores arbitrarios
+
+---
+
+## Layout
+
+- Mantener una estructura clara y predecible
+- Evitar wrappers innecesarios
+- No usar `Card` o contenedores con fondo distinto si el diseño no lo indica
+- Preferir una sola superficie visual continua cuando aplique
+
+---
+
+## Reutilización
+
+- Usar widgets reutilizables para:
+  - botones
+  - inputs
+  - headers
+  - listas
+  - estados vacíos
+
+- Antes de crear un widget nuevo:
+  1. revisar `shared/`
+  2. revisar la feature actual
+
+---
+
+## Espaciado
+
+- Mantener consistencia en padding y spacing
+- Evitar valores arbitrarios
+- Usar tokens (`AppSpacing`, etc.)
+- Ajustar valores solo si es necesario para coincidir con el diseño
+
+---
+
+## Tipografía
+
+- Usar estilos definidos en el theme
+- No modificar fontSize/fontWeight inline si ya existe un estilo
+- Mantener jerarquía visual consistente
+
+---
+
+## Composición
+
+- Dividir pantallas en widgets pequeños y reutilizables
+- Evitar widgets monolíticos
+- Mantener legibilidad del árbol de widgets
+
+---
+
+## Responsive
+
+- No fijar UI a dimensiones rígidas
+- Diseñar pensando en adaptabilidad
+- Usar constraints en lugar de valores absolutos cuando aplique
+
+---
+
+## Comportamiento visual
+
+- No eliminar elementos funcionales al ajustar UI
+- No romper comportamiento existente al modificar layout
+- Mantener elementos clave:
+  - indicadores visuales (ej: línea de hora actual)
+  - estados dinámicos
+  - feedback visual
+
+---
+
+## Al construir pantallas
+
+Antes de escribir código:
+
+1. identificar layout general
+2. identificar componentes reutilizables
+3. identificar specs necesarios (Figma)
+4. detectar posibles riesgos de romper comportamiento
+
+---
+
+## Restricciones
+
+- No inventar estilos nuevos sin justificación
+- No agregar sombras, bordes o colores no definidos en el diseño
+- No cambiar jerarquía visual sin motivo
+- No usar valores “aproximados” si existen specs
+
+---
+
+## Objetivo final
+
+La UI debe:
+
+- ser visualmente consistente
+- ser fiel al diseño original
+- evitar variaciones innecesarias
+- integrarse correctamente con el design system

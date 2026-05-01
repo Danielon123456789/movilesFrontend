@@ -1,0 +1,138 @@
+---
+alwaysApply: true
+---
+
+# Flutter State
+
+## Objetivo
+
+Manejar el estado de forma predecible, consistente y centralizada, evitando duplicación, desincronización y lógica dispersa.
+
+---
+
+## Estrategia de estado
+
+- Usar Riverpod como única estrategia principal de manejo de estado
+- No mezclar múltiples patrones de estado sin justificación clara
+
+---
+
+## Fuente de verdad (CRÍTICO)
+
+- Cada pieza de estado debe tener una única fuente de verdad
+- No duplicar estado entre UI y providers
+- No mantener copias locales del mismo estado
+
+Ejemplo:
+
+- selectedDate debe vivir en un provider, no en múltiples widgets
+
+---
+
+## Reglas de uso
+
+- Leer estado con `ref.watch`
+- Modificar estado con `ref.read(...).notifier`
+- No usar `setState` si el estado ya existe en un provider
+- No crear variables locales para representar estado global
+
+---
+
+## UI y estado
+
+La UI debe:
+
+- ser declarativa
+- renderizar en función del estado
+- no contener lógica de negocio
+
+Estados mínimos:
+
+- loading
+- success
+- empty
+- error
+
+No mezclar lógica de estado dentro de `build()`.
+
+---
+
+## Providers / Controllers
+
+Los providers deben:
+
+- ser la única fuente de verdad del estado
+- contener la lógica de negocio relacionada al estado
+- manejar side effects (API calls, cálculos, transformaciones)
+
+No deben:
+
+- contener lógica de UI
+- depender de widgets
+
+---
+
+## Sincronización entre pantallas
+
+- El estado compartido debe vivir en providers
+- No usar estado local para sincronizar pantallas
+- Cambios en una pantalla deben reflejarse automáticamente en otras
+
+Ejemplo:
+
+- seleccionar fecha en calendario debe reflejarse en pantalla de detalle
+
+---
+
+## Side effects
+
+- Mantener side effects dentro de providers/notifiers
+- No ejecutar lógica asíncrona directamente en widgets
+- No disparar llamadas de red desde el build()
+
+---
+
+## Inicialización de estado
+
+- Si una pantalla recibe datos (ej: fecha por ruta), debe sincronizarlo con el provider
+- No mantener estado duplicado solo para inicialización
+
+---
+
+## Nombres
+
+- Providers: `<feature>Provider`
+- Notifiers/Controllers: `<feature>Controller`
+
+Deben reflejar claramente su responsabilidad.
+
+---
+
+## Restricciones
+
+- No duplicar estado entre widgets
+- No usar estado local innecesario
+- No mover lógica de estado a la UI
+- No crear providers redundantes
+
+---
+
+## Al generar código
+
+Antes de implementar:
+
+1. identificar qué estado necesita la pantalla
+2. verificar si ya existe en un provider
+3. decidir si se reutiliza o se crea uno nuevo
+4. definir claramente la fuente de verdad
+
+---
+
+## Objetivo final
+
+El estado debe:
+
+- ser único y centralizado
+- mantenerse sincronizado entre pantallas
+- evitar duplicación
+- ser fácil de rastrear y depurar

@@ -89,15 +89,12 @@ class SettingsController extends Notifier<SettingsState> {
     final newTreatment = Treatment(
       name: name,
       durationMinutes: 60, // Default duration
-      color: Colors.primaries[state.treatments.length % Colors.primaries.length],
+      color:
+          Colors.primaries[state.treatments.length % Colors.primaries.length],
     );
-    state = state.copyWith(
-      treatments: [...state.treatments, newTreatment],
-    );
+    state = state.copyWith(treatments: [...state.treatments, newTreatment]);
   }
 }
 
 final settingsControllerProvider =
-    NotifierProvider<SettingsController, SettingsState>(
-  SettingsController.new,
-);
+    NotifierProvider<SettingsController, SettingsState>(SettingsController.new);

@@ -7,7 +7,6 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../shared/widgets/app_bottom_nav.dart';
 import '../../../../shared/widgets/app_screen_header.dart';
-import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../controllers/dashboard_controller.dart';
 import '../widgets/dashboard_metric_card.dart';
 
@@ -30,12 +29,6 @@ class DashboardScreen extends ConsumerWidget {
             Expanded(
               child: ListView(
                 children: [
-                  const SizedBox(height: AppSpacing.md),
-                  const _ProfileCard(),
-                  const SizedBox(height: AppSpacing.md),
-                  _SettingsCard(
-                    onConfigTap: () => context.push(Routes.settings),
-                  ),
                   const SizedBox(height: AppSpacing.md),
                   DashboardMetricCard(
                     label: 'Citas del Mes',
@@ -66,33 +59,28 @@ class DashboardScreen extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.md),
                   const _PendientesSection(),
                   const SizedBox(height: AppSpacing.md),
-                  _LogoutCard(
-                    onTap: () async {
-                      try {
-                        await ref
-                            .read(authControllerProvider.notifier)
-                            .logout();
-                        if (context.mounted) {
-                          context.go(Routes.login);
-                        }
-                      } catch (_) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('No se pudo cerrar sesión.'),
-                            ),
-                          );
-                        }
-                      }
-                    },
-                  ),
-                  const SizedBox(height: AppSpacing.md),
                 ],
               ),
             ),
           ],
         ),
       ),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: FloatingActionButton(
+          onPressed: () => context.push(Routes.settings),
+          backgroundColor: AppColors.accentBlue,
+          elevation: 4,
+          tooltip: 'Configuración',
+          shape: const CircleBorder(),
+          child: const Icon(
+            Icons.settings,
+            color: Colors.white,
+            size: 26,
+          ),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: AppBottomNav(
         currentIndex: 3,
         onTap: (index) => _onNavTap(context, index),
@@ -156,264 +144,6 @@ class _PendientesSection extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _ProfileCard extends StatelessWidget {
-  const _ProfileCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFDDDEE2)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _ProfileHeader(),
-          SizedBox(height: AppSpacing.lg),
-          _InfoRow(icon: Icons.mail_outline, text: 'juan.perez@clinica.com'),
-          SizedBox(height: AppSpacing.lg),
-          _InfoRow(icon: Icons.phone_outlined, text: '+52 55 1234 5678'),
-        ],
-      ),
-    );
-  }
-}
-
-class _ProfileHeader extends StatelessWidget {
-  const _ProfileHeader();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: 92,
-          height: 92,
-          decoration: BoxDecoration(
-            color: const Color(0xFF6479E8),
-            borderRadius: BorderRadius.circular(22),
-          ),
-          alignment: Alignment.center,
-          child: const Text(
-            'JP',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 36,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ),
-        const SizedBox(width: 18),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Dr. Juan Pérez',
-                style: TextStyle(
-                  fontSize: 24,
-                  color: Color(0xFF0F223A),
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFDADDF0),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.shield_outlined,
-                      color: Color(0xFF5E73E6),
-                      size: 22,
-                    ),
-                    SizedBox(width: 8),
-                    Text(
-                      'Terapeuta',
-                      style: TextStyle(
-                        color: Color(0xFF5E73E6),
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _InfoRow extends StatelessWidget {
-  const _InfoRow({required this.icon, required this.text});
-
-  final IconData icon;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, color: const Color(0xFF9AA3B2), size: 34),
-        const SizedBox(width: 16),
-        Text(
-          text,
-          style: const TextStyle(
-            color: Color(0xFF203552),
-            fontSize: 22,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _SettingsCard extends StatelessWidget {
-  const _SettingsCard({this.onConfigTap});
-
-  final VoidCallback? onConfigTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFDDDEE2)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          _SettingsItem(
-            icon: Icons.account_circle_outlined,
-            title: 'Profesionales',
-            onTap: () => context.go(Routes.therapists),
-          ),
-          const Divider(height: 1),
-          _SettingsItem(
-            icon: Icons.shield_outlined,
-            title: 'Configuración',
-            onTap: onConfigTap,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SettingsItem extends StatelessWidget {
-  const _SettingsItem({required this.icon, required this.title, this.onTap});
-
-  final IconData icon;
-  final String title;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap ?? () {},
-      borderRadius: BorderRadius.circular(24),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
-        child: Row(
-          children: [
-            Icon(icon, color: const Color(0xFF9AA3B2), size: 34),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Text(
-                title,
-                style: const TextStyle(
-                  color: Color(0xFF203552),
-                  fontSize: 22,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            const Icon(Icons.arrow_forward, color: Color(0xFF9AA3B2)),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _LogoutCard extends StatelessWidget {
-  const _LogoutCard({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFDDDEE2)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(24),
-        child: const Padding(
-          padding: EdgeInsets.symmetric(vertical: 20),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.logout_rounded, color: Color(0xFFFF4D4D), size: 28),
-              SizedBox(width: 10),
-              Text(
-                'Cerrar Sesión',
-                style: TextStyle(
-                  color: Color(0xFFFF4D4D),
-                  fontSize: 22,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

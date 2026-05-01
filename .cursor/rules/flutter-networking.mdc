@@ -1,0 +1,140 @@
+---
+alwaysApply: true
+---
+
+# Flutter Networking
+
+## Objetivo
+
+Mantener integraciones de red limpias, predecibles y fáciles de mantener, separando correctamente transporte, parsing, mapeo y manejo de errores.
+
+---
+
+## Ubicación
+
+Toda configuración e infraestructura HTTP debe vivir en `lib/core/network` o en la capa `data/` de cada feature, según corresponda.
+
+- `core/network` → cliente HTTP, interceptores, configuración global, auth headers, manejo base de errores
+- `features/<feature>/data/` → data sources, DTOs, mappers, repositorios concretos
+
+No mezclar responsabilidades.
+
+---
+
+## Separación obligatoria
+
+Separar siempre:
+
+- cliente HTTP
+- data sources
+- DTOs / request models / response models
+- mappers
+- repositorios concretos
+- entidades de dominio
+
+No usar una misma clase para múltiples responsabilidades.
+
+---
+
+## Reglas de implementación
+
+- No hacer requests HTTP dentro de widgets
+- No parsear JSON dentro de widgets, providers o controllers de UI
+- No usar DTOs directamente en la UI
+- No mezclar modelos de API con entidades de dominio
+- No transformar respuestas “inline” dentro de métodos largos
+- Si una respuesta requiere transformación, crear un mapper dedicado
+
+---
+
+## Data sources
+
+Los data sources deben:
+
+- encargarse solo de hablar con la API o fuente remota/local
+- devolver DTOs o modelos de data layer
+- no contener lógica de presentación
+- no contener lógica de negocio compleja
+
+---
+
+## Mappers
+
+Usar mappers explícitos cuando:
+
+- un DTO se convierte en entidad de dominio
+- una respuesta tiene campos opcionales o anidados
+- el formato de la API no coincide con el modelo interno
+
+Los mappers deben ser claros, pequeños y fáciles de testear.
+
+---
+
+## Manejo de errores
+
+- Manejar errores de red de forma explícita
+- No lanzar excepciones genéricas sin contexto
+- Convertir errores HTTP/parsing en errores entendibles por la app
+- Mantener una estrategia consistente de errores entre features
+
+Ejemplos:
+
+- timeout
+- unauthorized
+- not found
+- server error
+- invalid response
+- parsing error
+
+---
+
+## Requests y responses
+
+Usar clases dedicadas para request/response cuando:
+
+- el payload tenga varios campos
+- haya transformación no trivial
+- el endpoint tenga estructura propia
+- la claridad sea mejor que pasar mapas inline
+
+Evitar `Map<String, dynamic>` dispersos por todo el código.
+
+---
+
+## Providers y controllers
+
+- Los providers/controllers no deben conocer detalles del cliente HTTP
+- Deben depender de repositorios o casos de uso
+- No construir URLs, headers o payloads directamente en la UI layer
+
+---
+
+## Al generar código
+
+Antes de implementar una integración:
+
+1. identificar endpoint o fuente de datos
+2. definir dónde vive el data source
+3. definir DTOs necesarios
+4. definir mapper hacia dominio
+5. definir estrategia de manejo de errores
+
+---
+
+## Restricciones
+
+- No introducir librerías de networking nuevas sin justificación
+- No duplicar clientes HTTP
+- No hardcodear URLs fuera de la configuración correspondiente
+- No acoplar la UI al formato de la API
+
+---
+
+## Objetivo final
+
+El código de red debe:
+
+- ser fácil de mantener
+- ser consistente entre features
+- aislar el formato de la API del resto de la app
+- evitar que la UI dependa directamente de respuestas HTTP

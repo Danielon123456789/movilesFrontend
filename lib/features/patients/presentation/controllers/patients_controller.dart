@@ -9,7 +9,7 @@ class PatientsState {
     required this.patients,
     required this.query,
     required this.filter,
-    });
+  });
 
   final List<Patient> patients;
   final String query;
@@ -75,10 +75,13 @@ class PatientsController extends Notifier<PatientsState> {
     state = state.copyWith(filter: value);
   }
 
-  void addPatient({
-    required String name,
-    required String serviceLabel,
-  }) {
+  void removePatient(String id) {
+    state = state.copyWith(
+      patients: state.patients.where((p) => p.id != id).toList(),
+    );
+  }
+
+  void addPatient({required String name, required String serviceLabel}) {
     final patient = Patient(
       id: DateTime.now().microsecondsSinceEpoch.toString(),
       name: name,
@@ -87,9 +90,7 @@ class PatientsController extends Notifier<PatientsState> {
       isActive: true,
     );
 
-    state = state.copyWith(
-      patients: [patient, ...state.patients],
-    );
+    state = state.copyWith(patients: [patient, ...state.patients]);
   }
 }
 
@@ -118,4 +119,3 @@ final filteredPatientsProvider = Provider<List<Patient>>((ref) {
 
   return items.toList(growable: false);
 });
-

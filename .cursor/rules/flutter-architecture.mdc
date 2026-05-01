@@ -1,0 +1,116 @@
+---
+alwaysApply: true
+---
+
+# Flutter Architecture
+
+## Objetivo
+
+Mantener una arquitectura simple, escalable y consistente, evitando duplicación de lógica, estado inconsistente y código difícil de mantener.
+
+---
+
+## Estructura del proyecto
+
+Usa esta estructura base obligatoria:
+
+- `lib/app` → app shell, router, tema y configuración global
+- `lib/core` → utilidades transversales (network, errores, config, constantes)
+- `lib/shared` → widgets reutilizables, extensiones y helpers comunes
+- `lib/features/<feature>` → funcionalidades por módulo
+
+---
+
+## Estructura por feature
+
+Cada feature debe organizarse en:
+
+- `presentation/` → UI (screens, widgets, controllers/providers)
+- `domain/` → entidades, casos de uso, lógica de negocio pura
+- `data/` → modelos, mappers, fuentes de datos (API/local)
+
+No mezclar responsabilidades entre capas.
+
+---
+
+## Reglas de arquitectura (CRÍTICAS)
+
+- No duplicar estado: usar una sola fuente de verdad (ej: provider)
+- No usar estado local (`setState`, variables internas) si el estado ya existe en un provider
+- No mover lógica de negocio a la capa de UI
+- No crear lógica compleja dentro de widgets
+- No romper comportamiento existente al modificar UI
+
+---
+
+## Widgets
+
+- Preferir `StatelessWidget` siempre que sea posible
+- Usar `ConsumerWidget` o hooks cuando haya estado
+- No colocar lógica dentro de `build()`
+- Dividir widgets grandes en componentes pequeños
+- Preferir composición sobre widgets monolíticos
+
+---
+
+## Reutilización
+
+Antes de crear algo nuevo:
+
+1. Buscar en `shared/`
+2. Buscar en la misma feature
+3. Evaluar si se puede extraer como widget reutilizable
+
+No duplicar widgets o helpers existentes.
+
+---
+
+## Manejo de estado
+
+- Usar Riverpod como fuente de verdad
+- Acceder al estado con `ref.watch`
+- Modificar estado con `ref.read(...).notifier`
+- Mantener sincronización entre pantallas (no estados aislados)
+
+Ejemplo correcto:
+
+- selectedDate vive en un provider, no en la UI
+
+---
+
+## Al generar código
+
+ANTES de escribir código:
+
+1. Analizar estructura actual
+2. Proponer archivos a crear/modificar
+3. Explicar dónde se integrará
+
+---
+
+## Restricciones
+
+- No introducir nuevas carpetas sin justificación
+- No cambiar arquitectura existente
+- No eliminar funcionalidades existentes
+- No simplificar lógica sin verificar impacto
+
+---
+
+## Convenciones de nombres
+
+- Archivos: `snake_case`
+- Clases: `PascalCase`
+- Variables: `camelCase`
+- Providers: `<feature>Provider` o `<feature>Controller`
+
+---
+
+## Objetivo final
+
+El código debe:
+
+- Ser fácil de mantener
+- Tener una sola fuente de verdad para el estado
+- Evitar duplicación de lógica
+- Integrarse correctamente con el resto del proyecto

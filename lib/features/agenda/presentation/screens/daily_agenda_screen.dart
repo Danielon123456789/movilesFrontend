@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/router/routes.dart';
+import '../../../../shared/dialogs/confirm_delete_dialog.dart';
 import '../../../../shared/widgets/app_bottom_nav.dart';
+import '../../domain/entities/appointment.dart';
 import '../controllers/agenda_controller.dart';
 import '../widgets/agenda_day_detail_header.dart';
 import '../widgets/agenda_timeline.dart';
@@ -14,10 +17,7 @@ import '../widgets/agenda_week_strip.dart';
 import '../widgets/create_appointment_modal.dart';
 
 class DailyAgendaScreen extends ConsumerStatefulWidget {
-  const DailyAgendaScreen({
-    super.key,
-    required this.selectedDate,
-  });
+  const DailyAgendaScreen({super.key, required this.selectedDate});
 
   final DateTime selectedDate;
 
@@ -26,11 +26,16 @@ class DailyAgendaScreen extends ConsumerStatefulWidget {
 }
 
 class _DailyAgendaScreenState extends ConsumerState<DailyAgendaScreen> {
+  static const _appointmentDeletePendingMessage =
+      'La eliminación de citas desde la lista aún no está enlazada con el servidor.';
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(agendaControllerProvider.notifier).selectDate(widget.selectedDate);
+      ref
+          .read(agendaControllerProvider.notifier)
+          .selectDate(widget.selectedDate);
     });
   }
 
@@ -38,7 +43,9 @@ class _DailyAgendaScreenState extends ConsumerState<DailyAgendaScreen> {
   void didUpdateWidget(covariant DailyAgendaScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.selectedDate != widget.selectedDate) {
-      ref.read(agendaControllerProvider.notifier).selectDate(widget.selectedDate);
+      ref
+          .read(agendaControllerProvider.notifier)
+          .selectDate(widget.selectedDate);
     }
   }
 
@@ -51,20 +58,22 @@ class _DailyAgendaScreenState extends ConsumerState<DailyAgendaScreen> {
     final weekDays = weekContaining(selectedDate);
     final monthLabel = DateFormat('MMMM', 'es')
         .format(selectedDate)
-        .replaceFirstMapped(
-          RegExp(r'^.'),
-          (m) => m.group(0)!.toUpperCase(),
-        );
+        .replaceFirstMapped(RegExp(r'^.'), (m) => m.group(0)!.toUpperCase());
 
     final now = DateTime.now();
-    final isToday = selectedDate.year == now.year &&
+    final isToday =
+        selectedDate.year == now.year &&
         selectedDate.month == now.month &&
         selectedDate.day == now.day;
     final dayTitle = isToday
         ? 'Hoy'
-        : DateFormat('EEEE d', 'es').format(selectedDate).split(' ').map((s) {
-            return s[0].toUpperCase() + s.substring(1).toLowerCase();
-          }).join(' ');
+        : DateFormat('EEEE d', 'es')
+              .format(selectedDate)
+              .split(' ')
+              .map((s) {
+                return s[0].toUpperCase() + s.substring(1).toLowerCase();
+              })
+              .join(' ');
 
     final textTheme = Theme.of(context).textTheme;
     final appointments = ref.watch(appointmentsForSelectedDateProvider);
@@ -87,26 +96,29 @@ class _DailyAgendaScreenState extends ConsumerState<DailyAgendaScreen> {
           ),
           const SizedBox(height: AppSpacing.sm),
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-              children: [
-                Text(
-                  dayTitle,
-                  style: textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    fontStyle: FontStyle.italic,
+            child: SlidableAutoCloseBehavior(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                children: [
+                  Text(
+                    dayTitle,
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      fontStyle: FontStyle.italic,
+                    ),
                   ),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                AgendaTimeline(
-                  showCurrentTimeIndicator: isToday,
-                  appointments: appointments,
-                  onAppointmentTap: (appt) => context.push(
-                    '/agenda/detail',
-                    extra: appt,
+                  const SizedBox(height: AppSpacing.sm),
+                  AgendaTimeline(
+                    showCurrentTimeIndicator: isToday,
+                    appointments: appointments,
+                    agendaSwipeGroupTag: 'agenda_day_timeline',
+                    onAppointmentTap: (appt) =>
+                        context.push('/agenda/detail', extra: appt),
+                    onAppointmentDelete: (appt) =>
+                        _confirmDeleteAppointment(context, appt),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -127,6 +139,24 @@ class _DailyAgendaScreenState extends ConsumerState<DailyAgendaScreen> {
         currentIndex: 0,
         onTap: (index) => _onNavTap(context, index),
       ),
+    );
+  }
+
+  Future<void> _confirmDeleteAppointment(
+    BuildContext context,
+    Appointment appointment,
+  ) async {
+    final ok = await showConfirmDeleteDialog(
+      context,
+      title: 'Eliminar cita',
+      body:
+          '¿Seguro que deseas eliminar la cita "${appointment.title}"? '
+          'Esta acción no se guardará hasta que exista persistencia.',
+    );
+    if (!ok || !context.mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text(_appointmentDeletePendingMessage)),
     );
   }
 

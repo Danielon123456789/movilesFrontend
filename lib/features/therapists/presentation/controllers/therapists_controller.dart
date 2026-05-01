@@ -3,18 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/therapist.dart';
 
 class TherapistsState {
-  const TherapistsState({
-    required this.therapists,
-    required this.query,
-  });
+  const TherapistsState({required this.therapists, required this.query});
 
   final List<Therapist> therapists;
   final String query;
 
-  TherapistsState copyWith({
-    List<Therapist>? therapists,
-    String? query,
-  }) {
+  TherapistsState copyWith({List<Therapist>? therapists, String? query}) {
     return TherapistsState(
       therapists: therapists ?? this.therapists,
       query: query ?? this.query,
@@ -25,14 +19,17 @@ class TherapistsState {
 class TherapistsController extends Notifier<TherapistsState> {
   @override
   TherapistsState build() {
-    return const TherapistsState(
-      therapists: _mockTherapists,
-      query: '',
-    );
+    return const TherapistsState(therapists: _mockTherapists, query: '');
   }
 
   void setQuery(String value) {
     state = state.copyWith(query: value);
+  }
+
+  void removeTherapist(String id) {
+    state = state.copyWith(
+      therapists: state.therapists.where((t) => t.id != id).toList(),
+    );
   }
 }
 
@@ -79,8 +76,8 @@ const _mockTherapists = [
 
 final therapistsControllerProvider =
     NotifierProvider<TherapistsController, TherapistsState>(
-  TherapistsController.new,
-);
+      TherapistsController.new,
+    );
 
 final filteredTherapistsProvider = Provider<List<Therapist>>((ref) {
   final state = ref.watch(therapistsControllerProvider);
@@ -89,8 +86,10 @@ final filteredTherapistsProvider = Provider<List<Therapist>>((ref) {
   if (q.isEmpty) return state.therapists;
 
   return state.therapists
-      .where((t) =>
-          t.name.toLowerCase().contains(q) ||
-          t.specialty.toLowerCase().contains(q))
+      .where(
+        (t) =>
+            t.name.toLowerCase().contains(q) ||
+            t.specialty.toLowerCase().contains(q),
+      )
       .toList(growable: false);
 });

@@ -10,105 +10,117 @@ class PatientCard extends StatelessWidget {
     super.key,
     required this.patient,
     this.onTap,
+    this.showCardChrome = true,
   });
 
   final Patient patient;
   final VoidCallback? onTap;
 
+  /// Si es false, solo se pinta el contenido para incrustarlo en un contenedor exterior
+  /// ([Material] + [Slidable]) que define borde, sombra y recorte redondeado.
+  final bool showCardChrome;
+
+  static const double _chromeRadius = 18;
+
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final accent = patient.isActive ? AppColors.chipActiveFg : AppColors.chipInactiveFg;
+    final accent = patient.isActive
+        ? AppColors.chipActiveFg
+        : AppColors.chipInactiveFg;
+
+    final content = Row(
+      children: [
+        Container(
+          width: 6,
+          height: 92,
+          decoration: BoxDecoration(
+            color: accent,
+            borderRadius: const BorderRadius.horizontal(
+              left: Radius.circular(_chromeRadius),
+            ),
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CircleAvatar(
+                  radius: 22,
+                  backgroundColor: AppColors.bgCanvas,
+                  child: Icon(
+                    Icons.person,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        patient.daysLabel,
+                        style: textTheme.labelSmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        patient.name,
+                        style: textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        patient.serviceLabel,
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                PatientStatusChip(isActive: patient.isActive),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
 
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: Container(
-      margin: const EdgeInsets.fromLTRB(
-        AppSpacing.md,
-        0,
-        AppSpacing.md,
-        AppSpacing.md,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.cardSurface,
-        borderRadius: BorderRadius.circular(18),
-        border: const Border.fromBorderSide(
-          BorderSide(color: AppColors.subtleBorder),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 6,
-            height: 92,
-            decoration: BoxDecoration(
-              color: accent,
-              borderRadius: const BorderRadius.horizontal(
-                left: Radius.circular(18),
+      child: showCardChrome
+          ? Container(
+              margin: const EdgeInsets.fromLTRB(
+                AppSpacing.md,
+                0,
+                AppSpacing.md,
+                AppSpacing.md,
               ),
-            ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CircleAvatar(
-                    radius: 22,
-                    backgroundColor: AppColors.bgCanvas,
-                    child: Icon(
-                      Icons.person,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+              decoration: BoxDecoration(
+                color: AppColors.cardSurface,
+                borderRadius: BorderRadius.circular(_chromeRadius),
+                border: const Border.fromBorderSide(
+                  BorderSide(color: AppColors.subtleBorder),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
                   ),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          patient.daysLabel,
-                          style: textTheme.labelSmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.xs),
-                        Text(
-                          patient.name,
-                          style: textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.xs),
-                        Text(
-                          patient.serviceLabel,
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  PatientStatusChip(isActive: patient.isActive),
                 ],
               ),
-            ),
-          ),
-        ],
-      ),
-      ),
+              child: content,
+            )
+          : ColoredBox(color: Colors.transparent, child: content),
     );
   }
 }
-

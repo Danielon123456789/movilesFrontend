@@ -18,10 +18,7 @@ class CreateTherapistFormData {
 }
 
 class CreateTherapistModal extends StatefulWidget {
-  const CreateTherapistModal({
-    super.key,
-    required this.onSubmit,
-  });
+  const CreateTherapistModal({super.key, required this.onSubmit});
 
   final ValueChanged<CreateTherapistFormData> onSubmit;
 
@@ -84,10 +81,7 @@ class _CreateTherapistModalState extends State<CreateTherapistModal> {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.md),
-                _ModalInputField(
-                  label: 'Nombre',
-                  controller: _nameController,
-                ),
+                _ModalInputField(label: 'Nombre', controller: _nameController),
                 const SizedBox(height: AppSpacing.md),
                 _ModalInputField(
                   label: 'Teléfono',

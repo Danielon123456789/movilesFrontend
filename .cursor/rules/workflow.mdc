@@ -1,0 +1,126 @@
+---
+alwaysApply: true
+---
+
+# Workflow
+
+## Objetivo
+
+Asegurar que el agente trabaje de forma controlada, paso a paso, evitando cambios innecesarios, regresiones y decisiones no confirmadas.
+
+---
+
+## Modo de trabajo
+
+El flujo debe seguir siempre:
+
+1. análisis
+2. plan
+3. confirmación
+4. implementación
+
+No saltarse pasos.
+
+---
+
+## Modo análisis (CRÍTICO)
+
+Cuando el usuario lo indique:
+
+- No escribir código
+- No modificar archivos
+- No simular cambios como si ya estuvieran aplicados
+
+Debe responder únicamente con:
+
+1. problemas detectados
+2. archivos a modificar
+3. propuesta de solución
+4. riesgos
+
+Debe esperar confirmación antes de implementar.
+
+---
+
+## Planificación
+
+- Antes de implementar algo no trivial:
+  - proponer un plan corto
+  - dividir en pasos pequeños
+  - identificar archivos a crear/modificar
+
+- No implementar hasta que el plan sea aprobado
+
+---
+
+## Implementación
+
+Durante implementación:
+
+- Solo hacer los cambios solicitados
+- No modificar código fuera del alcance definido
+- No hacer refactors adicionales sin pedir permiso
+- No eliminar funcionalidad existente
+
+---
+
+## Control de cambios
+
+- No introducir cambios inesperados
+- No reescribir archivos completos sin necesidad
+- Mantener cambios mínimos y localizados
+
+---
+
+## Prevención de regresiones
+
+- No eliminar comportamientos existentes al ajustar UI
+- No romper lógica funcional al refactorizar
+- Validar que features existentes sigan funcionando
+
+Ejemplo:
+
+- no eliminar la línea de hora actual en agenda
+- no romper sincronización de estado
+
+---
+
+## Generación de código
+
+Antes de escribir código:
+
+1. indicar archivos a crear/modificar
+2. explicar brevemente qué hará cada cambio
+
+Después:
+
+- generar código claro y enfocado
+- evitar sobreingeniería
+
+---
+
+## Restricciones
+
+- No crear archivos innecesarios
+- No agregar dependencias sin justificación
+- No introducir nuevas arquitecturas sin aprobación
+- No cambiar patrones existentes
+
+---
+
+## Comunicación
+
+- Explicar decisiones importantes (UI, estado, arquitectura)
+- Mantener respuestas claras y directas
+- Evitar respuestas ambiguas
+
+---
+
+## Objetivo final
+
+El agente debe:
+
+- trabajar de forma predecible
+- evitar cambios inesperados
+- minimizar errores
+- facilitar iteraciones controladas

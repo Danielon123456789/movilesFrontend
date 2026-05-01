@@ -7,6 +7,8 @@ class Routes {
   static const String patients = '/patients';
   static const String patientDetail = '/patients/detail';
   static const String therapists = '/therapists';
+  static const String therapistsTreatments = '/therapists/treatments';
+
   static const String dashboard = '/dashboard';
   static const String settings = '/dashboard/settings';
 
