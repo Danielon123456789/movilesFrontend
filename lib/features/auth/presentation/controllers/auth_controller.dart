@@ -68,7 +68,7 @@ class AuthController extends Notifier<AuthState> {
   Future<void> loginWithGoogle() async {
     state = state.copyWith(isLoading: true, errorMessage: () => null);
     try {
-      final user = await ref.read(authRepositoryProvider).signInWithGoogle();
+      final (user, _) = await ref.read(authRepositoryProvider).signInWithGoogle();
       state = state.copyWith(user: () => user, isLoading: false);
     } on FirebaseAuthException catch (e) {
       state = state.copyWith(

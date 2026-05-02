@@ -158,5 +158,5 @@ class BackendApi {
 }
 
 final backendApiProvider = Provider<BackendApi>((ref) {
-  return BackendApi(DioClient.create());
+  return BackendApi(DioClient.create(ref));
 });

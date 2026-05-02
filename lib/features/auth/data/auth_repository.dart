@@ -31,7 +31,7 @@ class AuthRepository {
     return _toAppUser(result.user);
   }
 
-  Future<AppUser?> signInWithGoogle() async {
+  Future<(AppUser?, String?)> signInWithGoogle() async {
     final googleUser = await _googleSignIn.signIn();
     if (googleUser == null) {
       throw FirebaseAuthException(code: 'sign_in_canceled');
@@ -44,7 +44,7 @@ class AuthRepository {
     );
 
     final result = await _auth.signInWithCredential(credential);
-    return _toAppUser(result.user);
+    return (_toAppUser(result.user), googleAuth.accessToken);
   }
 
   Future<void> signOut() async {
@@ -58,5 +58,10 @@ class AuthRepository {
 }
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  return AuthRepository(FirebaseAuth.instance, GoogleSignIn());
+  return AuthRepository(
+    FirebaseAuth.instance,
+    GoogleSignIn(
+      scopes: ['email', 'https://www.googleapis.com/auth/calendar.events'],
+    ),
+  );
 });
