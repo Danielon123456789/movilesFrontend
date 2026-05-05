@@ -121,6 +121,7 @@ class PatientsController extends Notifier<PatientsState> {
     String? name,
     String? email,
     String? phoneNumber,
+    bool? active,
     // Solo sesión UI; no se persiste en el backend (ver TODO en merge).
     String? serviceLabel,
   }) {
@@ -133,6 +134,7 @@ class PatientsController extends Notifier<PatientsState> {
           name: name,
           email: email,
           phoneNumber: phoneNumber,
+          active: active,
         );
         if (!_alive) return;
         final idx = state.patients.indexWhere((p) => p.id == id);
@@ -149,7 +151,6 @@ class PatientsController extends Notifier<PatientsState> {
         final merged = fresh.copyWith(
           daysLabel: oldPatient.daysLabel,
           serviceLabel: serviceLabel ?? oldPatient.serviceLabel,
-          isActive: oldPatient.isActive,
         );
         final next = List<Patient>.from(state.patients);
         next[idx] = merged;
@@ -174,7 +175,12 @@ class PatientsController extends Notifier<PatientsState> {
     });
   }
 
-  Future<void> addPatient({required String name, required String serviceLabel}) {
+  Future<void> addPatient({
+    required String name,
+    required String serviceLabel,
+    String? email,
+    String? phoneNumber,
+  }) {
     // TODO(ui-session): `serviceLabel` no se persiste en el backend; solo se muestra en memoria
     // durante esta sesión. Tras reiniciar la app, el paciente tendrá el placeholder del repositorio.
     return Future.microtask(() async {
@@ -184,6 +190,8 @@ class PatientsController extends Notifier<PatientsState> {
         final patient = await repo.createPatient(
           name: name,
           serviceLabel: serviceLabel,
+          email: email,
+          phoneNumber: phoneNumber,
         );
         if (!_alive) return;
         state = state.copyWith(

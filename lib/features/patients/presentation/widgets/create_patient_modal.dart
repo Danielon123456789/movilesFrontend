@@ -10,12 +10,15 @@ class CreatePatientFormData {
     required this.tutorPhone,
     required this.tutorEmail,
     required this.service,
+    this.active,
   });
 
   final String name;
   final String tutorPhone;
   final String tutorEmail;
   final String service;
+  /// Solo se establece en modo edición.
+  final bool? active;
 }
 
 /// Bottom sheet compartido: creación ([initialPatient] null) o edición (no null).
@@ -40,11 +43,14 @@ class _CreatePatientModalState extends State<CreatePatientModal> {
   final _tutorEmailController = TextEditingController();
   final _serviceController = TextEditingController();
 
+  late bool _active;
+
   bool get _isEditing => widget.initialPatient != null;
 
   @override
   void initState() {
     super.initState();
+    _active = widget.initialPatient?.isActive ?? true;
     final p = widget.initialPatient;
     if (p != null) {
       _nameController.text = p.name;
@@ -157,6 +163,28 @@ class _CreatePatientModalState extends State<CreatePatientModal> {
                     return null;
                   },
                 ),
+                if (_isEditing) ...[
+                  const SizedBox(height: AppSpacing.md),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Paciente activo',
+                          style: textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                      Switch(
+                        value: _active,
+                        onChanged: (v) => setState(() => _active = v),
+                        activeThumbColor: AppColors.chipActiveFg,
+                      ),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: AppSpacing.lg),
                 SizedBox(
                   width: double.infinity,
@@ -199,6 +227,7 @@ class _CreatePatientModalState extends State<CreatePatientModal> {
         tutorPhone: _tutorPhoneController.text.trim(),
         tutorEmail: _tutorEmailController.text.trim(),
         service: _serviceController.text.trim(),
+        active: _isEditing ? _active : null,
       ),
     );
   }

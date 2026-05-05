@@ -24,7 +24,7 @@ class PatientsRepositoryImpl implements PatientsRepository {
       daysLabel: PatientModel.uiPlaceholderDaysLabel,
       serviceLabel:
           serviceLabelOverride ?? PatientModel.uiPlaceholderServiceLabel,
-      isActive: PatientModel.uiPlaceholderIsActive,
+      isActive: model.active,
       email: model.email,
       phoneNumber: model.phoneNumber,
     );
@@ -65,6 +65,7 @@ class PatientsRepositoryImpl implements PatientsRepository {
     String? name,
     String? email,
     String? phoneNumber,
+    bool? active,
   }) async {
     try {
       final model = await _remote.updatePatient(
@@ -72,6 +73,7 @@ class PatientsRepositoryImpl implements PatientsRepository {
         name: name,
         email: email,
         phoneNumber: phoneNumber,
+        active: active,
       );
       return _toEntity(model);
     } on DioException catch (e) {

@@ -44,11 +44,13 @@ class PatientsRemoteDataSource {
     String? name,
     String? email,
     String? phoneNumber,
+    bool? active,
   }) async {
     final data = <String, dynamic>{
       'name': name,
       'email': email,
       'phoneNumber': phoneNumber,
+      'active': active,
     }..removeWhere((_, v) => v == null);
 
     final response = await _dio.patch('$_base/$id', data: data);

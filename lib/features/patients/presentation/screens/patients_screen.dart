@@ -262,7 +262,12 @@ class PatientsScreen extends ConsumerWidget {
   ) async {
     final notifier = ref.read(patientsControllerProvider.notifier);
     if (editingPatient == null) {
-      await notifier.addPatient(name: data.name, serviceLabel: data.service);
+      await notifier.addPatient(
+        name: data.name,
+        serviceLabel: data.service,
+        email: data.tutorEmail,
+        phoneNumber: data.tutorPhone,
+      );
     } else {
       await notifier.updatePatient(
         editingPatient.id,
@@ -270,6 +275,7 @@ class PatientsScreen extends ConsumerWidget {
         email: data.tutorEmail,
         phoneNumber: data.tutorPhone,
         serviceLabel: data.service,
+        active: data.active,
       );
     }
 
