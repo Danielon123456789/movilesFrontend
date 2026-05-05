@@ -1,29 +1,28 @@
 import 'package:agenda/core/network/dio_client.dart';
 import 'package:agenda/models/organization.model.dart';
 import 'package:agenda/models/user.model.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class OrganizationController {
-  final Ref _ref;
+  final Dio _dio;
+  final _prefix = '/api/v1/organizations';
 
-  OrganizationController(this._ref);
+  OrganizationController(Ref ref) : _dio = ref.read(dioProvider);
 
   Future<Organization> create({required String name}) async {
-    final dio = _ref.read(dioProvider);
-    final response = await dio.post('/organizations', data: {'name': name});
+    final response = await _dio.post(_prefix, data: {'name': name});
     return Organization.fromJson(response.data);
   }
 
   Future<Organization> getMyOrganization() async {
-    final dio = _ref.read(dioProvider);
-    final response = await dio.get('/organizations/mine');
+    final response = await _dio.get('$_prefix/mine');
     return Organization.fromJson(response.data);
   }
 
   Future<User> updateUserRole(String email, String role) async {
-    final dio = _ref.read(dioProvider);
-    final response = await dio.put(
-      '/organizations/role',
+    final response = await _dio.put(
+      '$_prefix/role',
       data: {'email': email, 'role': role},
     );
     return User.fromJson(response.data);

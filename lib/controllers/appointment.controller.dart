@@ -1,11 +1,13 @@
 import 'package:agenda/core/network/dio_client.dart';
 import 'package:agenda/models/appointment.model.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AppointmentController {
-  final Ref _ref;
+  final Dio _dio;
+  final _prefix = '/api/v1/appointments';
 
-  AppointmentController(this._ref);
+  AppointmentController(Ref ref) : _dio = ref.read(dioProvider);
 
   Future<Appointment> create({
     required int patientId,
@@ -15,9 +17,8 @@ class AppointmentController {
     int? serviceId,
     String? notes,
   }) async {
-    final dio = _ref.read(dioProvider);
-    final response = await dio.post(
-      '/appointments',
+    final response = await _dio.post(
+      _prefix,
       data: {
         'patientId': patientId,
         'therapistId': therapistId,
@@ -31,9 +32,8 @@ class AppointmentController {
   }
 
   Future<List<Appointment>> getMyAppointments(QueryAppointments query) async {
-    final dio = _ref.read(dioProvider);
-    final response = await dio.get(
-      '/appointments/therapist/me',
+    final response = await _dio.get(
+      '$_prefix/therapist/me',
       queryParameters: query.toJson(),
     );
     return (response.data as List)
@@ -42,15 +42,13 @@ class AppointmentController {
   }
 
   Future<Appointment> getById(int id) async {
-    final dio = _ref.read(dioProvider);
-    final response = await dio.get('/appointments/$id');
+    final response = await _dio.get('$_prefix/$id');
     return Appointment.fromJson(response.data);
   }
 
   Future<List<Appointment>> getByQuery(QueryAppointments query) async {
-    final dio = _ref.read(dioProvider);
-    final response = await dio.get(
-      '/appointments',
+    final response = await _dio.get(
+      _prefix,
       queryParameters: query.toJson(),
     );
     return (response.data as List)
@@ -59,9 +57,8 @@ class AppointmentController {
   }
 
   Future<Appointment> updateNotes(int id, String notes) async {
-    final dio = _ref.read(dioProvider);
-    final response = await dio.put(
-      '/appointments/$id/notes',
+    final response = await _dio.put(
+      '$_prefix/$id/notes',
       data: {'notes': notes},
     );
     return Appointment.fromJson(response.data);

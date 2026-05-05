@@ -1,20 +1,21 @@
 import 'package:agenda/core/network/dio_client.dart';
 import 'package:agenda/models/patient.model.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class PatientController {
-  final Ref _ref;
+  final Dio _dio;
+  final _prefix = '/api/v1/patients';
 
-  PatientController(this._ref);
+  PatientController(Ref ref) : _dio = ref.read(dioProvider);
 
   Future<Patient> create({
     required String name,
     String? email,
     String? phoneNumber,
   }) async {
-    final dio = _ref.read(dioProvider);
-    final response = await dio.post(
-      '/patients',
+    final response = await _dio.post(
+      _prefix,
       data: {'name': name, 'email': email, 'phoneNumber': phoneNumber}
         ..removeWhere((k, v) => v == null),
     );
@@ -22,15 +23,13 @@ class PatientController {
   }
 
   Future<Patient> getById(int id) async {
-    final dio = _ref.read(dioProvider);
-    final response = await dio.get('/patients/$id');
+    final response = await _dio.get('$_prefix/$id');
     return Patient.fromJson(response.data);
   }
 
   Future<List<Patient>> getByQuery(String query) async {
-    final dio = _ref.read(dioProvider);
-    final response = await dio.get(
-      '/patients',
+    final response = await _dio.get(
+      _prefix,
       queryParameters: {'query': query},
     );
     return (response.data as List)
