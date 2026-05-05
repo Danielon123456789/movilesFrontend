@@ -1,4 +1,4 @@
-import 'package:agenda/features/patients/data/models/patient_model.dart';
+import 'package:agenda/models/patient.model.dart';
 import 'package:agenda/models/service.model.dart';
 import 'package:agenda/models/user.model.dart';
 
@@ -7,7 +7,7 @@ class Appointment {
   final DateTime startDate;
   final DateTime endDate;
   final String notes;
-  final PatientModel patient;
+  final Patient patient;
   final User therapist;
   final Service? service;
 
@@ -27,7 +27,7 @@ class Appointment {
       startDate: DateTime.parse(json['startDate']),
       endDate: DateTime.parse(json['endDate']),
       notes: json['notes'],
-      patient: PatientModel.fromJson(
+      patient: Patient.fromJson(
         Map<String, dynamic>.from(json['patient'] as Map),
       ),
       therapist: User.fromJson(json['therapist']),

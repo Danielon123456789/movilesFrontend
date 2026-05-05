@@ -7,9 +7,6 @@ import '../controllers/settings_controller.dart';
 import '../widgets/create_treatment_modal.dart';
 import '../widgets/general_and_treatments_widgets.dart';
 
-/// Pantalla dedicada a General (duración) y lista de tratamientos.
-///
-/// Header alineado a [PatientDetailScreen] (fondo blanco, chevron atrás centrado).
 class TreatmentsScreen extends ConsumerWidget {
   const TreatmentsScreen({super.key});
 

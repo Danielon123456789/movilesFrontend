@@ -16,7 +16,6 @@ class TherapistCard extends StatelessWidget {
   final Therapist therapist;
   final VoidCallback? onTap;
 
-  /// Menú ⋮ superior derecha. Si ambos son null, no se muestra el botón.
   final VoidCallback? onMenuEdit;
   final VoidCallback? onMenuDelete;
 

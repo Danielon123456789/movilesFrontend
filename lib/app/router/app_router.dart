@@ -1,3 +1,4 @@
+import 'package:agenda/models/patient.model.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/agenda/domain/entities/appointment.dart';
@@ -10,7 +11,6 @@ import '../../features/settings/presentation/screens/treatments_screen.dart';
 import '../../features/therapists/presentation/screens/therapists_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
-import '../../features/patients/domain/entities/patient.dart';
 import '../../features/patients/presentation/screens/patient_detail_screen.dart';
 import '../../features/patients/presentation/screens/patients_screen.dart';
 import 'routes.dart';

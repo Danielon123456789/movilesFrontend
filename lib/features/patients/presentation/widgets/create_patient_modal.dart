@@ -1,8 +1,8 @@
+import 'package:agenda/models/patient.model.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
-import '../../domain/entities/patient.dart';
 
 class CreatePatientFormData {
   const CreatePatientFormData({
@@ -18,7 +18,6 @@ class CreatePatientFormData {
   final String service;
 }
 
-/// Bottom sheet compartido: creación ([initialPatient] null) o edición (no null).
 class CreatePatientModal extends StatefulWidget {
   const CreatePatientModal({
     super.key,
@@ -48,7 +47,6 @@ class _CreatePatientModalState extends State<CreatePatientModal> {
     final p = widget.initialPatient;
     if (p != null) {
       _nameController.text = p.name;
-      _serviceController.text = p.serviceLabel;
       _tutorPhoneController.text = p.phoneNumber ?? '';
       _tutorEmailController.text = p.email ?? '';
     }

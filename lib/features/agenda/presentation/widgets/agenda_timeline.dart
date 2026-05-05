@@ -26,7 +26,6 @@ class AgendaTimeline extends StatelessWidget {
   final ValueChanged<Appointment>? onAppointmentTap;
   final ValueChanged<Appointment> onAppointmentDelete;
 
-  /// Grupo opcional para [SlidableAutoCloseBehavior] desde la pantalla contenedora.
   final Object? agendaSwipeGroupTag;
 
   @override
@@ -177,10 +176,6 @@ class AgendaTimeline extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
 (double, double) _parseTimeRange(String timeRange) {
   final parts = timeRange.split(' - ');
   return (_parseHourMinute(parts[0].trim()), _parseHourMinute(parts[1].trim()));
@@ -190,10 +185,6 @@ double _parseHourMinute(String hm) {
   final parts = hm.split(':');
   return int.parse(parts[0]) + int.parse(parts[1]) / 60;
 }
-
-// ---------------------------------------------------------------------------
-// Timeline appointment card (Figma style)
-// ---------------------------------------------------------------------------
 
 class _TimelineAppointmentCard extends StatelessWidget {
   const _TimelineAppointmentCard({
@@ -266,10 +257,6 @@ class _TimelineAppointmentCard extends StatelessWidget {
     );
   }
 }
-
-// ---------------------------------------------------------------------------
-// Grid painter
-// ---------------------------------------------------------------------------
 
 class _GridLinePainter extends CustomPainter {
   _GridLinePainter({required this.hourHeight});

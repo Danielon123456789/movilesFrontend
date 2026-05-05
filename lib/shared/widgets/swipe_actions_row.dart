@@ -3,9 +3,6 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 
 import '../../app/theme/app_colors.dart';
 
-/// Descripción de un botón trasero al deslizar hacia la izquierda (LTR).
-///
-/// Solo UI: [onPressed] debe ejecutar navegación o delegar desde la pantalla vía closures.
 class SwipeActionSpec {
   const SwipeActionSpec({
     required this.backgroundColor,
@@ -24,9 +21,6 @@ class SwipeActionSpec {
   final int flex;
 }
 
-/// Fila envuelta en [Slidable] con paneles configurables por defecto (editar / eliminar).
-///
-/// Si necesitas más acciones, pasa [trailingActions] (prioridad sobre [onEdit]/[onDelete]).
 class SwipeActionsRow extends StatelessWidget {
   const SwipeActionsRow({
     super.key,
@@ -44,18 +38,14 @@ class SwipeActionsRow extends StatelessWidget {
 
   final Widget child;
 
-  /// Usados cuando [trailingActions] es null.
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
 
-  /// Si no es null, reemplaza el par editar / eliminar por defecto.
   final List<SwipeActionSpec>? trailingActions;
 
-  /// Opcional para [SlidableAutoCloseBehavior]: solo un slidable abierto por grupo.
   final Object? groupTag;
   final bool enabled;
 
-  /// Fracción del ancho del ítem ocupada por el panel (debe estar en ]0, 1]).
   final double? extentRatio;
 
   static double _defaultExtentRatio(int actionCount) {

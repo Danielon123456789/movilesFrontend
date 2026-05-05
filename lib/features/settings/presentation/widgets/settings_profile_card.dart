@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 
-/// Perfil compacto en Configuración (avatar + nombre + rol, correo y teléfono).
 class SettingsProfileCard extends StatelessWidget {
   const SettingsProfileCard({super.key});
 

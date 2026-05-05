@@ -4,7 +4,6 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../controllers/settings_controller.dart';
 
-/// Título de bloque compartido (también usado desde [SettingsScreen] en notificaciones).
 class SettingsSectionTitle extends StatelessWidget {
   const SettingsSectionTitle({
     super.key,
@@ -34,7 +33,6 @@ class SettingsSectionTitle extends StatelessWidget {
   }
 }
 
-/// Duración predeterminada (antes en Configuración).
 class GeneralDurationSection extends StatelessWidget {
   const GeneralDurationSection({
     super.key,
@@ -74,7 +72,6 @@ class GeneralDurationSection extends StatelessWidget {
   }
 }
 
-/// Lista editable de tratamientos (antes en Configuración).
 class TreatmentsManagementSection extends StatelessWidget {
   const TreatmentsManagementSection({
     super.key,
@@ -246,7 +243,6 @@ class _TreatmentExpansionTile extends StatelessWidget {
   }
 }
 
-/// Campo con borde usado en duración predeterminada y notificaciones.
 class SettingsOutlinedTextField extends StatelessWidget {
   const SettingsOutlinedTextField({
     super.key,

@@ -1,9 +1,8 @@
+import 'package:agenda/models/patient.model.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
-import '../../domain/entities/patient.dart';
-import 'patient_status_chip.dart';
 
 class PatientCard extends StatelessWidget {
   const PatientCard({
@@ -16,8 +15,6 @@ class PatientCard extends StatelessWidget {
   final Patient patient;
   final VoidCallback? onTap;
 
-  /// Si es false, solo se pinta el contenido para incrustarlo en un contenedor exterior
-  /// ([Material] + [Slidable]) que define borde, sombra y recorte redondeado.
   final bool showCardChrome;
 
   static const double _chromeRadius = 18;
@@ -25,22 +22,8 @@ class PatientCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final accent = patient.isActive
-        ? AppColors.chipActiveFg
-        : AppColors.chipInactiveFg;
-
     final content = Row(
       children: [
-        Container(
-          width: 6,
-          height: 92,
-          decoration: BoxDecoration(
-            color: accent,
-            borderRadius: const BorderRadius.horizontal(
-              left: Radius.circular(_chromeRadius),
-            ),
-          ),
-        ),
         Expanded(
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.md),
@@ -61,7 +44,7 @@ class PatientCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        patient.daysLabel,
+                        '—',
                         style: textTheme.labelSmall?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                           fontWeight: FontWeight.w600,
@@ -76,7 +59,7 @@ class PatientCard extends StatelessWidget {
                       ),
                       const SizedBox(height: AppSpacing.xs),
                       Text(
-                        patient.serviceLabel,
+                        '—',
                         style: textTheme.bodyMedium?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
@@ -85,7 +68,6 @@ class PatientCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm),
-                PatientStatusChip(isActive: patient.isActive),
               ],
             ),
           ),

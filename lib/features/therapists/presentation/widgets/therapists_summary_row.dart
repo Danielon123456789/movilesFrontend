@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_spacing.dart';
 
-/// Misma distribución que [PatientsSummaryRow]: conteo a la izquierda,
-/// acción secundaria a la derecha.
 class TherapistsSummaryRow extends StatelessWidget {
   const TherapistsSummaryRow({
     super.key,

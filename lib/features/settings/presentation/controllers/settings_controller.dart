@@ -88,7 +88,7 @@ class SettingsController extends Notifier<SettingsState> {
   void addTreatment(String name) {
     final newTreatment = Treatment(
       name: name,
-      durationMinutes: 60, // Default duration
+      durationMinutes: 60,
       color:
           Colors.primaries[state.treatments.length % Colors.primaries.length],
     );

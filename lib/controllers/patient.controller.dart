@@ -28,13 +28,33 @@ class PatientController {
   }
 
   Future<List<Patient>> getByQuery(String query) async {
-    final response = await _dio.get(
-      _prefix,
-      queryParameters: {'query': query},
-    );
+    final response = await _dio.get(_prefix, queryParameters: {'query': query});
     return (response.data as List)
         .map((json) => Patient.fromJson(json))
         .toList();
+  }
+
+  Future<Patient> update(
+    int id, {
+    String? name,
+    String? email,
+    String? phoneNumber,
+  }) async {
+    final response = await _dio.put(
+      '$_prefix/$id',
+      data: {'name': name, 'email': email, 'phoneNumber': phoneNumber}
+        ..removeWhere((k, v) => v == null),
+    );
+    return Patient.fromJson(response.data);
+  }
+
+  Future<void> delete(
+    int id, {
+    String? name,
+    String? email,
+    String? phoneNumber,
+  }) async {
+    await _dio.delete('$_prefix/$id');
   }
 }
 

@@ -1,8 +1,8 @@
+import 'package:agenda/models/patient.model.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
-import '../../domain/entities/patient.dart';
 
 class PatientDetailScreen extends StatelessWidget {
   const PatientDetailScreen({super.key, required this.patient});
@@ -71,7 +71,7 @@ class PatientDetailScreen extends StatelessWidget {
                       label: 'HORARIO DEL PACIENTE',
                       children: [
                         Text(
-                          patient.daysLabel,
+                          '—',
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
@@ -128,10 +128,6 @@ class PatientDetailScreen extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Header
-// ---------------------------------------------------------------------------
-
 class _Header extends StatelessWidget {
   const _Header({required this.onBack});
 
@@ -169,10 +165,6 @@ class _Header extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Label + value pair
-// ---------------------------------------------------------------------------
-
 class _LabelValue extends StatelessWidget {
   const _LabelValue({required this.label, required this.value});
 
@@ -205,10 +197,6 @@ class _LabelValue extends StatelessWidget {
     );
   }
 }
-
-// ---------------------------------------------------------------------------
-// Icon + info row (reused pattern from appointment detail)
-// ---------------------------------------------------------------------------
 
 class _InfoRow extends StatelessWidget {
   const _InfoRow({
@@ -257,10 +245,6 @@ class _InfoRow extends StatelessWidget {
     );
   }
 }
-
-// ---------------------------------------------------------------------------
-// Progress section
-// ---------------------------------------------------------------------------
 
 class _ProgressData {
   const _ProgressData({

@@ -6,12 +6,10 @@ class PatientsSummaryRow extends StatelessWidget {
   const PatientsSummaryRow({
     super.key,
     required this.countLabel,
-    required this.filterLabel,
     required this.onFilterTap,
   });
 
   final String countLabel;
-  final String filterLabel;
   final VoidCallback onFilterTap;
 
   @override
@@ -43,14 +41,6 @@ class PatientsSummaryRow extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Text(
-                    filterLabel,
-                    style: textTheme.titleSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
                   Icon(
                     Icons.tune,
                     size: 18,

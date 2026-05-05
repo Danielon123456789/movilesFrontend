@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 class AppColors {
   static const Color seed = Color(0xFF6750A4);
 
-  // Semantic colors (minimal set).
   static const Color primary = seed;
   static const Color secondary = Color(0xFF625B71);
 
@@ -14,7 +13,6 @@ class AppColors {
   static const Color textSecondary = Color(0xFF49454F);
   static const Color subtleBorder = Color(0xFFE6E6E6);
 
-  // Patients screen tokens (minimal, reusable).
   static const Color bgCanvas = Color(0xFFF3F4F6);
   static const Color cardSurface = Color(0xFFFFFFFF);
 

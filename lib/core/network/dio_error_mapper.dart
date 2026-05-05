@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 
-/// Traduce [DioException] a mensaje legible (reutilizable por todas las features HTTP).
 String dioExceptionToMessage(DioException e) {
   final status = e.response?.statusCode;
   final data = e.response?.data;
