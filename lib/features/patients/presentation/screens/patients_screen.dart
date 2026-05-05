@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -19,9 +21,6 @@ import '../widgets/patients_summary_row.dart';
 
 class PatientsScreen extends ConsumerWidget {
   const PatientsScreen({super.key});
-
-  static const _pendingMessage =
-      'Este botón guardará el nuevo paciente en la base de datos.';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -70,8 +69,11 @@ class PatientsScreen extends ConsumerWidget {
                           child: SwipeActionsRow(
                             key: ValueKey('patient_${p.id}'),
                             groupTag: 'patients_list',
-                            onEdit: () =>
-                                context.push('/patients/detail', extra: p),
+                            onEdit: () => _showPatientSheet(
+                              context,
+                              ref,
+                              editingPatient: p,
+                            ),
                             onDelete: () =>
                                 _confirmRemovePatient(context, ref, p),
                             child: PatientCard(
@@ -94,7 +96,7 @@ class PatientsScreen extends ConsumerWidget {
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 8),
         child: FloatingActionButton(
-          onPressed: () => _showCreatePatientModal(context, ref),
+          onPressed: () => _showPatientSheet(context, ref),
           backgroundColor: AppColors.accentBlue,
           elevation: 4,
           shape: const CircleBorder(),
@@ -118,16 +120,24 @@ class PatientsScreen extends ConsumerWidget {
       context,
       title: 'Eliminar paciente',
       body:
-          '¿Seguro que deseas eliminar de la lista a "${patient.name}"? '
-          'Solo se quitará de la vista local hasta que exista servidor.',
+          '¿Seguro que deseas eliminar a "${patient.name}"? '
+          'Se eliminará en el servidor y desaparecerá de tu lista.',
     );
     if (!ok || !context.mounted) return;
 
-    ref.read(patientsControllerProvider.notifier).removePatient(patient.id);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Paciente eliminado de la lista actual.')),
+    await ref.read(patientsControllerProvider.notifier).removePatient(
+      patient.id,
     );
+    if (!context.mounted) return;
+    final err = ref.read(patientsControllerProvider).errorMessage;
+    final messenger = ScaffoldMessenger.of(context);
+    if (err != null && err.isNotEmpty) {
+      messenger.showSnackBar(SnackBar(content: Text(err)));
+    } else {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Paciente eliminado.')),
+      );
+    }
   }
 
   static void _onNavTap(BuildContext context, int index) {
@@ -214,10 +224,11 @@ class PatientsScreen extends ConsumerWidget {
     );
   }
 
-  static Future<void> _showCreatePatientModal(
+  static Future<void> _showPatientSheet(
     BuildContext context,
-    WidgetRef ref,
-  ) {
+    WidgetRef ref, {
+    Patient? editingPatient,
+  }) {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -226,17 +237,59 @@ class PatientsScreen extends ConsumerWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (sheetContext) => CreatePatientModal(
+        initialPatient: editingPatient,
         onSubmit: (data) {
-          ref
-              .read(patientsControllerProvider.notifier)
-              .addPatient(name: data.name, serviceLabel: data.service);
-
-          Navigator.of(sheetContext).pop();
-
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text(_pendingMessage)));
+          unawaited(
+            _handlePatientSheetSubmit(
+              context,
+              ref,
+              sheetContext,
+              data,
+              editingPatient,
+            ),
+          );
         },
+      ),
+    );
+  }
+
+  static Future<void> _handlePatientSheetSubmit(
+    BuildContext rootContext,
+    WidgetRef ref,
+    BuildContext sheetContext,
+    CreatePatientFormData data,
+    Patient? editingPatient,
+  ) async {
+    final notifier = ref.read(patientsControllerProvider.notifier);
+    if (editingPatient == null) {
+      await notifier.addPatient(name: data.name, serviceLabel: data.service);
+    } else {
+      await notifier.updatePatient(
+        editingPatient.id,
+        name: data.name,
+        email: data.tutorEmail,
+        phoneNumber: data.tutorPhone,
+        serviceLabel: data.service,
+      );
+    }
+
+    if (sheetContext.mounted) Navigator.of(sheetContext).pop();
+    if (!rootContext.mounted) return;
+
+    final err = ref.read(patientsControllerProvider).errorMessage;
+    final messenger = ScaffoldMessenger.of(rootContext);
+    if (err != null && err.isNotEmpty) {
+      messenger.showSnackBar(SnackBar(content: Text(err)));
+      return;
+    }
+
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          editingPatient == null
+              ? 'Paciente creado.'
+              : 'Cambios guardados.',
+        ),
       ),
     );
   }

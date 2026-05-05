@@ -1,6 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:agenda/core/network/api_exception.dart';
+
 import '../../domain/entities/patient.dart';
+import '../../patients_providers.dart';
 
 enum PatientsFilter { all, active, inactive }
 
@@ -9,62 +12,72 @@ class PatientsState {
     required this.patients,
     required this.query,
     required this.filter,
+    required this.isLoading,
+    this.errorMessage,
   });
 
   final List<Patient> patients;
   final String query;
   final PatientsFilter filter;
+  final bool isLoading;
+  final String? errorMessage;
 
   PatientsState copyWith({
     List<Patient>? patients,
     String? query,
     PatientsFilter? filter,
+    bool? isLoading,
+    String? Function()? errorMessage,
   }) {
     return PatientsState(
       patients: patients ?? this.patients,
       query: query ?? this.query,
       filter: filter ?? this.filter,
+      isLoading: isLoading ?? this.isLoading,
+      errorMessage: errorMessage != null ? errorMessage() : this.errorMessage,
     );
   }
 }
 
 class PatientsController extends Notifier<PatientsState> {
+  /// Evita aplicar `state` tras `await` si el notifier ya se dispuso.
+  bool get _alive => ref.mounted;
+
   @override
   PatientsState build() {
-    return PatientsState(
-      patients: const [
-        Patient(
-          id: '1',
-          name: 'María González',
-          daysLabel: 'Lunes, Martes',
-          serviceLabel: 'Fisioterapia General',
-          isActive: true,
-        ),
-        Patient(
-          id: '2',
-          name: 'Roberto Gómez',
-          daysLabel: 'Martes, Jueves',
-          serviceLabel: 'Ajuste Quiropráctico',
-          isActive: false,
-        ),
-        Patient(
-          id: '3',
-          name: 'Carlos Rodríguez',
-          daysLabel: 'Viernes',
-          serviceLabel: 'Fisioterapia General',
-          isActive: true,
-        ),
-        Patient(
-          id: '4',
-          name: 'Ana Martínez',
-          daysLabel: 'Sábado, Lunes',
-          serviceLabel: 'Fisioterapia General',
-          isActive: true,
-        ),
-      ],
+    Future.microtask(_loadInitial);
+    return const PatientsState(
+      patients: [],
       query: '',
       filter: PatientsFilter.all,
+      isLoading: true,
+      errorMessage: null,
     );
+  }
+
+  Future<void> _loadInitial() async {
+    final repo = ref.read(patientsRepositoryProvider);
+    try {
+      final list = await repo.fetchPatients();
+      if (!_alive) return;
+      state = state.copyWith(
+        patients: list,
+        isLoading: false,
+        errorMessage: () => null,
+      );
+    } on ApiException catch (e) {
+      if (!_alive) return;
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: () => e.message,
+      );
+    } catch (e) {
+      if (!_alive) return;
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: () => 'Error inesperado: $e',
+      );
+    }
   }
 
   void setQuery(String value) {
@@ -75,22 +88,123 @@ class PatientsController extends Notifier<PatientsState> {
     state = state.copyWith(filter: value);
   }
 
-  void removePatient(String id) {
-    state = state.copyWith(
-      patients: state.patients.where((p) => p.id != id).toList(),
-    );
+  Future<void> removePatient(String id) {
+    return Future.microtask(() async {
+      final repo = ref.read(patientsRepositoryProvider);
+      state = state.copyWith(isLoading: true, errorMessage: () => null);
+      try {
+        await repo.deletePatient(id);
+        if (!_alive) return;
+        state = state.copyWith(
+          patients: state.patients.where((p) => p.id != id).toList(),
+          isLoading: false,
+          errorMessage: () => null,
+        );
+      } on ApiException catch (e) {
+        if (!_alive) return;
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: () => e.message,
+        );
+      } catch (e) {
+        if (!_alive) return;
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: () => 'Error inesperado: $e',
+        );
+      }
+    });
   }
 
-  void addPatient({required String name, required String serviceLabel}) {
-    final patient = Patient(
-      id: DateTime.now().microsecondsSinceEpoch.toString(),
-      name: name,
-      daysLabel: 'Por asignar',
-      serviceLabel: serviceLabel,
-      isActive: true,
-    );
+  Future<void> updatePatient(
+    String id, {
+    String? name,
+    String? email,
+    String? phoneNumber,
+    // Solo sesión UI; no se persiste en el backend (ver TODO en merge).
+    String? serviceLabel,
+  }) {
+    return Future.microtask(() async {
+      final repo = ref.read(patientsRepositoryProvider);
+      state = state.copyWith(isLoading: true, errorMessage: () => null);
+      try {
+        final fresh = await repo.updatePatient(
+          id,
+          name: name,
+          email: email,
+          phoneNumber: phoneNumber,
+        );
+        if (!_alive) return;
+        final idx = state.patients.indexWhere((p) => p.id == id);
+        if (idx < 0) {
+          state = state.copyWith(
+            isLoading: false,
+            errorMessage: () => null,
+          );
+          return;
+        }
+        final oldPatient = state.patients[idx];
+        // TODO(ui-session): `serviceLabel` no se persiste en el backend; solo en memoria.
+        // Tras reiniciar la app, vendrá el placeholder del repositorio.
+        final merged = fresh.copyWith(
+          daysLabel: oldPatient.daysLabel,
+          serviceLabel: serviceLabel ?? oldPatient.serviceLabel,
+          isActive: oldPatient.isActive,
+        );
+        final next = List<Patient>.from(state.patients);
+        next[idx] = merged;
+        state = state.copyWith(
+          patients: next,
+          isLoading: false,
+          errorMessage: () => null,
+        );
+      } on ApiException catch (e) {
+        if (!_alive) return;
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: () => e.message,
+        );
+      } catch (e) {
+        if (!_alive) return;
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: () => 'Error inesperado: $e',
+        );
+      }
+    });
+  }
 
-    state = state.copyWith(patients: [patient, ...state.patients]);
+  Future<void> addPatient({required String name, required String serviceLabel}) {
+    // TODO(ui-session): `serviceLabel` no se persiste en el backend; solo se muestra en memoria
+    // durante esta sesión. Tras reiniciar la app, el paciente tendrá el placeholder del repositorio.
+    return Future.microtask(() async {
+      final repo = ref.read(patientsRepositoryProvider);
+      state = state.copyWith(isLoading: true, errorMessage: () => null);
+      try {
+        final patient = await repo.createPatient(
+          name: name,
+          serviceLabel: serviceLabel,
+        );
+        if (!_alive) return;
+        state = state.copyWith(
+          patients: [patient, ...state.patients],
+          isLoading: false,
+          errorMessage: () => null,
+        );
+      } on ApiException catch (e) {
+        if (!_alive) return;
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: () => e.message,
+        );
+      } catch (e) {
+        if (!_alive) return;
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: () => 'Error inesperado: $e',
+        );
+      }
+    });
   }
 }
 

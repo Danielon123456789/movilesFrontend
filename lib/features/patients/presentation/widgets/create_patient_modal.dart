@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
+import '../../domain/entities/patient.dart';
 
 class CreatePatientFormData {
   const CreatePatientFormData({
@@ -17,12 +18,15 @@ class CreatePatientFormData {
   final String service;
 }
 
+/// Bottom sheet compartido: creación ([initialPatient] null) o edición (no null).
 class CreatePatientModal extends StatefulWidget {
   const CreatePatientModal({
     super.key,
+    this.initialPatient,
     required this.onSubmit,
   });
 
+  final Patient? initialPatient;
   final ValueChanged<CreatePatientFormData> onSubmit;
 
   @override
@@ -35,6 +39,20 @@ class _CreatePatientModalState extends State<CreatePatientModal> {
   final _tutorPhoneController = TextEditingController();
   final _tutorEmailController = TextEditingController();
   final _serviceController = TextEditingController();
+
+  bool get _isEditing => widget.initialPatient != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final p = widget.initialPatient;
+    if (p != null) {
+      _nameController.text = p.name;
+      _serviceController.text = p.serviceLabel;
+      _tutorPhoneController.text = p.phoneNumber ?? '';
+      _tutorEmailController.text = p.email ?? '';
+    }
+  }
 
   @override
   void dispose() {
@@ -77,7 +95,7 @@ class _CreatePatientModalState extends State<CreatePatientModal> {
                 ),
                 const SizedBox(height: AppSpacing.md),
                 Text(
-                  'Nuevo paciente',
+                  _isEditing ? 'Editar paciente' : 'Nuevo paciente',
                   style: textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
@@ -157,7 +175,9 @@ class _CreatePatientModalState extends State<CreatePatientModal> {
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    child: const Text('Crear paciente'),
+                    child: Text(
+                      _isEditing ? 'Guardar cambios' : 'Crear paciente',
+                    ),
                   ),
                 ),
               ],
