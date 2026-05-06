@@ -93,12 +93,21 @@ class TherapistsScreen extends ConsumerWidget {
                         ),
                       ),
                       Expanded(
-                        child: ListView.builder(
-                          itemCount: users.length,
-                          itemBuilder: (context, index) {
-                            final user = users[index];
-                            return TherapistCard(therapist: user);
+                        child: RefreshIndicator(
+                          onRefresh: () async {
+                            ref.invalidate(usersProvider);
+                            await Future.delayed(
+                              const Duration(milliseconds: 500),
+                            );
                           },
+                          child: ListView.builder(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            itemCount: users.length,
+                            itemBuilder: (context, index) {
+                              final user = users[index];
+                              return TherapistCard(therapist: user);
+                            },
+                          ),
                         ),
                       ),
                     ],

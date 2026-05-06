@@ -75,7 +75,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                               child: Row(
                                 children: [
                                   const Text(
-                                    'Citas de hoy',
+                                    'Citas',
                                     style: TextStyle(
                                       fontSize: 22,
                                       fontWeight: FontWeight.w700,
