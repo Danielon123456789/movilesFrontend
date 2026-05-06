@@ -17,6 +17,7 @@ class AgendaTimeline extends StatelessWidget {
     required this.showCurrentTimeIndicator,
     this.appointments = const [],
     this.onAppointmentTap,
+    this.onAppointmentEdit,
     required this.onAppointmentDelete,
     this.agendaSwipeGroupTag = 'agenda_day_timeline',
   });
@@ -24,6 +25,9 @@ class AgendaTimeline extends StatelessWidget {
   final bool showCurrentTimeIndicator;
   final List<Appointment> appointments;
   final ValueChanged<Appointment>? onAppointmentTap;
+
+  /// Callback del botón "Modificar" del swipe. Si es null se usa [onAppointmentTap].
+  final ValueChanged<Appointment>? onAppointmentEdit;
   final ValueChanged<Appointment> onAppointmentDelete;
 
   /// Grupo opcional para [SlidableAutoCloseBehavior] desde la pantalla contenedora.
@@ -130,6 +134,12 @@ class AgendaTimeline extends StatelessWidget {
   }
 
   List<Widget> _buildAppointmentOverlay(Appointment appt, double hourHeight) {
+    // TODO(timeline): el bloque siempre dibuja franja de 1h, ignorando la duración real.
+    // El backend ya devuelve startDate y endDate correctos (la duración depende del servicio
+    // elegido al crear la cita). Cuando se atienda este TODO, calcular altura real:
+    //   final (startTime, endTime) = _parseTimeRange(appt.timeRange);
+    //   final height = (endTime - startTime) * hourHeight;
+    // Por ahora se mantiene el comportamiento legacy para no salir del scope de este PR.
     final (startTime, _) = _parseTimeRange(appt.timeRange);
 
     final slotStart = startTime.floor();
@@ -158,7 +168,8 @@ class AgendaTimeline extends StatelessWidget {
           key: ValueKey('timeline_${appt.id}'),
           groupTag: agendaSwipeGroupTag,
           onEdit: () {
-            if (onAppointmentTap != null) onAppointmentTap!(appt);
+            final editCallback = onAppointmentEdit ?? onAppointmentTap;
+            if (editCallback != null) editCallback(appt);
           },
           onDelete: () => onAppointmentDelete(appt),
           child: GestureDetector(

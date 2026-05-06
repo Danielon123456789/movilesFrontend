@@ -42,7 +42,10 @@ class AppointmentDetailScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _PatientSection(patientName: appointment.title),
+                    _PatientSection(
+                      patientName: appointment.title,
+                      therapistName: appointment.therapist,
+                    ),
                     const SizedBox(height: AppSpacing.md),
                     const Divider(
                       height: 1,
@@ -145,12 +148,21 @@ class _Header extends StatelessWidget {
 }
 
 class _PatientSection extends StatelessWidget {
-  const _PatientSection({required this.patientName});
+  const _PatientSection({
+    required this.patientName,
+    required this.therapistName,
+  });
 
   final String patientName;
+  final String therapistName;
 
   @override
   Widget build(BuildContext context) {
+    final trimmedTherapist = therapistName.trim();
+    final subtitle = trimmedTherapist.isEmpty
+        ? 'Paciente programado para el terapeuta asignado.'
+        : 'Paciente programado para $trimmedTherapist.';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -163,9 +175,9 @@ class _PatientSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.xs),
-        const Text(
-          'Paciente programado para esta sesión.',
-          style: TextStyle(
+        Text(
+          subtitle,
+          style: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w400,
             color: AppColors.textMuted,

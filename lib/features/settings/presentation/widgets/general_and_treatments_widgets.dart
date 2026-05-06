@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:agenda/features/services/domain/entities/service.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
-import '../controllers/settings_controller.dart';
-import 'edit_treatment_modal.dart';
+
+/// Color estable para el punto del listado (solo presentación).
+Color treatmentSwatchColor(Service service) => Colors
+    .primaries[service.id.hashCode.abs() % Colors.primaries.length];
 
 /// Título de bloque compartido (también usado desde [SettingsScreen] en notificaciones).
 class SettingsSectionTitle extends StatelessWidget {
@@ -77,15 +80,15 @@ class GeneralDurationSection extends StatelessWidget {
   }
 }
 
-/// Lista editable de tratamientos (antes en Configuración).
+/// Lista de tratamientos (servicios backend). Editar / eliminar requieren API aún no disponible.
 class TreatmentsManagementSection extends StatelessWidget {
   const TreatmentsManagementSection({
     super.key,
-    required this.treatments,
+    required this.services,
     required this.onAdd,
   });
 
-  final List<Treatment> treatments;
+  final List<Service> services;
   final VoidCallback onAdd;
 
   @override
@@ -119,11 +122,8 @@ class TreatmentsManagementSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: AppSpacing.md),
-        for (int i = 0; i < treatments.length; i++) ...[
-          _TreatmentExpansionTile(
-            treatment: treatments[i],
-            index: i,
-          ),
+        for (final service in services) ...[
+          _TreatmentExpansionTile(service: service),
           const SizedBox(height: AppSpacing.sm),
         ],
       ],
@@ -131,17 +131,23 @@ class TreatmentsManagementSection extends StatelessWidget {
   }
 }
 
-class _TreatmentExpansionTile extends ConsumerWidget {
-  const _TreatmentExpansionTile({
-    required this.treatment,
-    required this.index,
-  });
+class _TreatmentExpansionTile extends StatelessWidget {
+  const _TreatmentExpansionTile({required this.service});
 
-  final Treatment treatment;
-  final int index;
+  final Service service;
+
+  void _showServerPending(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Esta acción estará disponible cuando exista soporte en el servidor.',
+        ),
+      ),
+    );
+  }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return ClipRRect(
       borderRadius: BorderRadius.circular(14),
@@ -155,7 +161,7 @@ class _TreatmentExpansionTile extends ConsumerWidget {
               width: 14,
               height: 14,
               decoration: BoxDecoration(
-                color: treatment.color,
+                color: treatmentSwatchColor(service),
                 shape: BoxShape.circle,
               ),
             ),
@@ -165,7 +171,7 @@ class _TreatmentExpansionTile extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    treatment.name,
+                    service.name,
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
@@ -174,7 +180,7 @@ class _TreatmentExpansionTile extends ConsumerWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '${treatment.durationMinutes} min',
+                    '${service.duration} min',
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w400,
@@ -190,49 +196,25 @@ class _TreatmentExpansionTile extends ConsumerWidget {
           Divider(height: 1, color: colorScheme.outlineVariant),
           _tileOption(
             context,
-            ref,
             icon: Icons.edit_outlined,
             text: 'Editar',
-            onTap: () => _openEditTreatment(context, ref),
+            onTap: () => _showServerPending(context),
           ),
           Divider(height: 1, color: colorScheme.outlineVariant),
           _tileOption(
             context,
-            ref,
             icon: Icons.delete_outline,
             text: 'Eliminar',
             color: AppColors.error,
-            onTap: () {
-              ref.read(settingsControllerProvider.notifier).deleteTreatment(index);
-              Navigator.of(context).maybePop();
-            },
+            onTap: () => _showServerPending(context),
           ),
         ],
       ),
     );
   }
 
-  void _openEditTreatment(BuildContext context, WidgetRef ref) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (sheetContext) => EditTreatmentModal(
-        initialName: treatment.name,
-        onSubmit: (newName) {
-          ref.read(settingsControllerProvider.notifier).editTreatment(index, newName);
-          Navigator.of(sheetContext).pop();
-        },
-      ),
-    );
-  }
-
   Widget _tileOption(
-    BuildContext context,
-    WidgetRef ref, {
+    BuildContext context, {
     required IconData icon,
     required String text,
     required VoidCallback onTap,

@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 
+typedef CreateTreatmentSubmit = Future<void> Function(String name, int duration);
+
 class CreateTreatmentModal extends StatefulWidget {
   const CreateTreatmentModal({super.key, required this.onSubmit});
 
-  final ValueChanged<String> onSubmit;
+  final CreateTreatmentSubmit onSubmit;
 
   @override
   State<CreateTreatmentModal> createState() => _CreateTreatmentModalState();
@@ -15,10 +17,13 @@ class CreateTreatmentModal extends StatefulWidget {
 class _CreateTreatmentModalState extends State<CreateTreatmentModal> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  final _durationController = TextEditingController();
+  var _submitting = false;
 
   @override
   void dispose() {
     _nameController.dispose();
+    _durationController.dispose();
     super.dispose();
   }
 
@@ -64,7 +69,7 @@ class _CreateTreatmentModalState extends State<CreateTreatmentModal> {
                 const SizedBox(height: AppSpacing.md),
                 TextFormField(
                   controller: _nameController,
-                  textInputAction: TextInputAction.done,
+                  textInputAction: TextInputAction.next,
                   decoration: const InputDecoration(
                     labelText: 'Nombre del tratamiento',
                     hintText: 'Ej. Fisioterapia General',
@@ -76,12 +81,32 @@ class _CreateTreatmentModalState extends State<CreateTreatmentModal> {
                     return null;
                   },
                 ),
+                const SizedBox(height: AppSpacing.md),
+                TextFormField(
+                  controller: _durationController,
+                  keyboardType: TextInputType.number,
+                  textInputAction: TextInputAction.done,
+                  decoration: const InputDecoration(
+                    labelText: 'Duración (minutos)',
+                    hintText: 'Ej. 60',
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Ingresa la duración en minutos';
+                    }
+                    final n = int.tryParse(value.trim());
+                    if (n == null || n < 1) {
+                      return 'Debe ser un entero mayor que 0';
+                    }
+                    return null;
+                  },
+                ),
                 const SizedBox(height: AppSpacing.lg),
                 SizedBox(
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: _submit,
+                    onPressed: _submitting ? null : _submit,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.accentBlue,
                       foregroundColor: Colors.white,
@@ -94,7 +119,13 @@ class _CreateTreatmentModalState extends State<CreateTreatmentModal> {
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    child: const Text('Crear tratamiento'),
+                    child: _submitting
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('Crear tratamiento'),
                   ),
                 ),
               ],
@@ -105,10 +136,20 @@ class _CreateTreatmentModalState extends State<CreateTreatmentModal> {
     );
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    widget.onSubmit(_nameController.text.trim());
+    final name = _nameController.text.trim();
+    final duration = int.parse(_durationController.text.trim());
+
+    setState(() => _submitting = true);
+    try {
+      await widget.onSubmit(name, duration);
+    } finally {
+      if (mounted) {
+        setState(() => _submitting = false);
+      }
+    }
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../app/theme/app_spacing.dart';
+import '../../../appointments/appointments_providers.dart';
 import '../controllers/agenda_controller.dart';
 import 'agenda_day_cell.dart';
 
@@ -22,7 +23,11 @@ class AgendaCalendarSection extends ConsumerWidget {
     final state = ref.watch(agendaControllerProvider);
     final notifier = ref.read(agendaControllerProvider.notifier);
     final cells = visibleGridCells(state.visibleMonth);
-    final daysWithAppointments = ref.watch(daysWithAppointmentsProvider);
+    final daysAsync = ref.watch(daysWithAppointmentsForCalendarProvider);
+    final daysWithAppointments = daysAsync.maybeWhen(
+      data: (value) => value,
+      orElse: () => const <int>{},
+    );
 
     final dateLabel = DateFormat('d MMM yy EEEE', 'es')
         .format(state.selectedDate)

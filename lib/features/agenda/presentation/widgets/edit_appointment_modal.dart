@@ -8,28 +8,28 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../appointments/appointments_providers.dart';
 import '../controllers/agenda_controller.dart';
+import '../models/appointment_view_model.dart';
 import '../providers/create_appointment_providers.dart';
 
-class CreateAppointmentModal extends ConsumerStatefulWidget {
-  const CreateAppointmentModal({
+class EditAppointmentModal extends ConsumerStatefulWidget {
+  const EditAppointmentModal({
     super.key,
-    required this.initialDate,
+    required this.appointment,
   });
 
-  final DateTime initialDate;
+  final AppointmentViewModel appointment;
 
   @override
-  ConsumerState<CreateAppointmentModal> createState() =>
-      _CreateAppointmentModalState();
+  ConsumerState<EditAppointmentModal> createState() =>
+      _EditAppointmentModalState();
 }
 
-class _CreateAppointmentModalState
-    extends ConsumerState<CreateAppointmentModal> {
+class _EditAppointmentModalState extends ConsumerState<EditAppointmentModal> {
   final _formKey = GlobalKey<FormState>();
 
-  String? _selectedPatientId;
-  String? _selectedTherapistId;
-  String? _selectedServiceId;
+  late String? _selectedPatientId;
+  late String? _selectedTherapistId;
+  late String? _selectedServiceId;
 
   late DateTime _selectedDateTime;
 
@@ -38,7 +38,10 @@ class _CreateAppointmentModalState
   @override
   void initState() {
     super.initState();
-    _selectedDateTime = widget.initialDate;
+    _selectedPatientId = widget.appointment.patientId;
+    _selectedTherapistId = widget.appointment.therapistId;
+    _selectedServiceId = widget.appointment.serviceId;
+    _selectedDateTime = widget.appointment.startDate.toLocal();
   }
 
   Future<void> _selectDateTime() async {
@@ -56,9 +59,7 @@ class _CreateAppointmentModalState
       initialTime: TimeOfDay.fromDateTime(_selectedDateTime),
     );
 
-    if (!mounted || selectedTime == null) {
-      return;
-    }
+    if (!mounted || selectedTime == null) return;
 
     setState(() {
       _selectedDateTime = DateTime(
@@ -75,6 +76,11 @@ class _CreateAppointmentModalState
     final agenda = ref.read(agendaControllerProvider);
     final anchors = <DateTime>{
       DateTime(appointmentStart.year, appointmentStart.month, 1),
+      DateTime(
+        widget.appointment.startDate.toLocal().year,
+        widget.appointment.startDate.toLocal().month,
+        1,
+      ),
       DateTime(agenda.visibleMonth.year, agenda.visibleMonth.month, 1),
       DateTime(agenda.selectedDate.year, agenda.selectedDate.month, 1),
     };
@@ -101,10 +107,11 @@ class _CreateAppointmentModalState
     setState(() => _submitting = true);
 
     try {
-      await ref.read(appointmentsRepositoryProvider).createAppointment(
-            patientId: _selectedPatientId!,
-            therapistId: _selectedTherapistId!,
-            serviceId: _selectedServiceId!,
+      await ref.read(appointmentsRepositoryProvider).updateAppointment(
+            widget.appointment.id,
+            patientId: _selectedPatientId,
+            therapistId: _selectedTherapistId,
+            serviceId: _selectedServiceId,
             startDate: start,
             endDate: end,
           );
@@ -114,7 +121,7 @@ class _CreateAppointmentModalState
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cita creada correctamente.')),
+        const SnackBar(content: Text('Cita modificada correctamente.')),
       );
       Navigator.of(context).pop();
     } on ApiException catch (e) {
@@ -216,14 +223,14 @@ class _CreateAppointmentModalState
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
-              'Crear cita',
+              'Modificar cita',
               style: textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w700,
                 color: colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: AppSpacing.md),
-            _ModalDropdownField(
+            _EditDropdownField(
               label: 'Paciente',
               hintText: draft.patients.isEmpty
                   ? 'Sin pacientes disponibles'
@@ -237,7 +244,7 @@ class _CreateAppointmentModalState
                   setState(() => _selectedPatientId = value),
             ),
             const SizedBox(height: AppSpacing.md),
-            _ModalDropdownField(
+            _EditDropdownField(
               label: 'Terapeuta',
               hintText: draft.therapists.isEmpty
                   ? 'Sin terapeutas disponibles'
@@ -251,7 +258,7 @@ class _CreateAppointmentModalState
                   setState(() => _selectedTherapistId = value),
             ),
             const SizedBox(height: AppSpacing.md),
-            _ModalDropdownField(
+            _EditDropdownField(
               label: 'Tratamiento',
               hintText: draft.services.isEmpty
                   ? 'Sin tratamientos disponibles'
@@ -261,7 +268,8 @@ class _CreateAppointmentModalState
                 for (final s in draft.services) s.id: s.name,
               },
               enabled: draft.services.isNotEmpty,
-              onChanged: (value) => setState(() => _selectedServiceId = value),
+              onChanged: (value) =>
+                  setState(() => _selectedServiceId = value),
             ),
             if (_selectedServiceId != null && durationMinutes != null)
               Padding(
@@ -275,7 +283,7 @@ class _CreateAppointmentModalState
                 ),
               ),
             const SizedBox(height: AppSpacing.md),
-            _ModalDateTimeField(
+            _EditDateTimeField(
               dateTime: _selectedDateTime,
               onTap: _selectDateTime,
             ),
@@ -308,7 +316,7 @@ class _CreateAppointmentModalState
                         height: 22,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Crear cita'),
+                    : const Text('Guardar cambios'),
               ),
             ),
           ],
@@ -318,8 +326,8 @@ class _CreateAppointmentModalState
   }
 }
 
-class _ModalDropdownField extends StatelessWidget {
-  const _ModalDropdownField({
+class _EditDropdownField extends StatelessWidget {
+  const _EditDropdownField({
     required this.label,
     required this.hintText,
     required this.value,
@@ -366,14 +374,12 @@ class _ModalDropdownField extends StatelessWidget {
           enabled: enabled,
           validator: (v) {
             if (!enabled) return null;
-            if (v == null || v.isEmpty) {
-              return 'Selecciona una opción';
-            }
+            if (v == null || v.isEmpty) return 'Selecciona una opción';
             return null;
           },
           builder: (fieldState) {
             return InputDecorator(
-              decoration: _modalDropdownDecoration(context).copyWith(
+              decoration: _editDropdownDecoration(context).copyWith(
                 errorText: fieldState.errorText,
               ),
               child: DropdownButtonHideUnderline(
@@ -407,7 +413,7 @@ class _ModalDropdownField extends StatelessWidget {
   }
 }
 
-InputDecoration _modalDropdownDecoration(BuildContext context) {
+InputDecoration _editDropdownDecoration(BuildContext context) {
   final colorScheme = Theme.of(context).colorScheme;
 
   return InputDecoration(
@@ -432,8 +438,8 @@ InputDecoration _modalDropdownDecoration(BuildContext context) {
   );
 }
 
-class _ModalDateTimeField extends StatelessWidget {
-  const _ModalDateTimeField({
+class _EditDateTimeField extends StatelessWidget {
+  const _EditDateTimeField({
     required this.dateTime,
     required this.onTap,
   });

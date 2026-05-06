@@ -1,7 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../domain/entities/appointment.dart';
-
 class AgendaState {
   const AgendaState({
     required this.visibleMonth,
@@ -88,98 +86,8 @@ List<int?> visibleGridCells(DateTime month) {
   return result;
 }
 
-bool _sameDate(DateTime a, DateTime b) {
-  return a.year == b.year && a.month == b.month && a.day == b.day;
-}
-
-Set<int> _daysWithAppointments(List<Appointment> appointments, DateTime month) {
-  final set = <int>{};
-  for (final a in appointments) {
-    if (a.date.year == month.year && a.date.month == month.month) {
-      set.add(a.date.day);
-    }
-  }
-  return set;
-}
-
-final mockAppointmentsProvider = Provider<List<Appointment>>((ref) {
-  final now = DateTime.now();
-  return [
-    Appointment(
-      id: '1',
-      title: 'María González',
-      category: 'Fisioterapia General',
-      date: DateTime(now.year, now.month, 3),
-      timeRange: '10:00 - 11:00',
-      therapist: 'Daniel Hernández',
-    ),
-    Appointment(
-      id: '2',
-      title: 'Roberto Gómez',
-      category: 'Ajuste Quiropráctico',
-      date: DateTime(now.year, now.month, 10),
-      timeRange: '09:00 - 09:45',
-      therapist: 'Sergio Gómez',
-    ),
-    Appointment(
-      id: '3',
-      title: 'Carlos Rodríguez',
-      category: 'Fisioterapia General',
-      date: DateTime(now.year, now.month, 10),
-      timeRange: '15:30 - 16:30',
-      therapist: 'Roberto Gómez',
-    ),
-    Appointment(
-      id: '4',
-      title: 'Ana Martínez',
-      category: 'Consulta',
-      date: DateTime(now.year, now.month, 15),
-      timeRange: '11:00 - 12:00',
-      therapist: 'Carlos Rodríguez',
-    ),
-    Appointment(
-      id: '5',
-      title: 'Pedro Sánchez',
-      category: 'Fisioterapia General',
-      date: DateTime(now.year, now.month, 22),
-      timeRange: '16:00 - 17:00',
-      therapist: 'Daniel Hernández',
-    ),
-    Appointment(
-      id: '6',
-      title: 'Laura Fernández',
-      category: 'Revisión',
-      date: DateTime(now.year, now.month, 22),
-      timeRange: '12:00 - 12:30',
-      therapist: 'Sergio Gómez',
-    ),
-  ];
-});
-
-final appointmentsForSelectedDateProvider = Provider<List<Appointment>>((ref) {
-  final state = ref.watch(agendaControllerProvider);
-  final all = ref.watch(mockAppointmentsProvider);
-  return all
-      .where((a) => _sameDate(a.date, state.selectedDate))
-      .toList(growable: false);
-});
-
-final appointmentsForDateProvider =
-    Provider.family<List<Appointment>, DateTime>((ref, date) {
-  final all = ref.watch(mockAppointmentsProvider);
-  return all
-      .where((a) => _sameDate(a.date, date))
-      .toList(growable: false);
-});
-
 List<DateTime> weekContaining(DateTime date) {
   final sundayOffset = date.weekday % 7;
   final sunday = date.subtract(Duration(days: sundayOffset));
   return List.generate(7, (i) => sunday.add(Duration(days: i)));
 }
-
-final daysWithAppointmentsProvider = Provider<Set<int>>((ref) {
-  final state = ref.watch(agendaControllerProvider);
-  final appointments = ref.watch(mockAppointmentsProvider);
-  return _daysWithAppointments(appointments, state.visibleMonth);
-});

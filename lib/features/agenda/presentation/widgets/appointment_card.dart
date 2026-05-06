@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
-import '../../domain/entities/appointment.dart';
+import '../models/appointment_view_model.dart';
 
 class AppointmentCard extends StatelessWidget {
   const AppointmentCard({
@@ -11,7 +11,7 @@ class AppointmentCard extends StatelessWidget {
     this.onTap,
   });
 
-  final Appointment appointment;
+  final AppointmentViewModel appointment;
   final VoidCallback? onTap;
 
   @override

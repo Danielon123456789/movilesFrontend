@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:agenda/core/network/api_exception.dart';
+
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../controllers/settings_controller.dart';
@@ -10,11 +12,45 @@ import '../widgets/general_and_treatments_widgets.dart';
 /// Pantalla dedicada a General (duración) y lista de tratamientos.
 ///
 /// Header alineado a [PatientDetailScreen] (fondo blanco, chevron atrás centrado).
-class TreatmentsScreen extends ConsumerWidget {
+class TreatmentsScreen extends ConsumerStatefulWidget {
   const TreatmentsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TreatmentsScreen> createState() => _TreatmentsScreenState();
+}
+
+class _TreatmentsScreenState extends ConsumerState<TreatmentsScreen> {
+  var _loadingTreatments = true;
+
+  Future<void> _loadTreatments() async {
+    setState(() => _loadingTreatments = true);
+    try {
+      await ref
+          .read(settingsControllerProvider.notifier)
+          .refreshTreatmentsServices();
+    } on ApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message)),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _loadingTreatments = false);
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadTreatments();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(settingsControllerProvider);
     final notifier = ref.read(settingsControllerProvider.notifier);
 
@@ -28,37 +64,50 @@ class TreatmentsScreen extends ConsumerWidget {
             ),
             Expanded(
               child: RefreshIndicator(
-                onRefresh: () => ref.read(settingsControllerProvider.notifier).fetchTreatments(),
+                onRefresh: _loadTreatments,
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.lg,
                     vertical: AppSpacing.md,
                   ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    GeneralDurationSection(
-                      duration: state.defaultDuration,
-                      onDurationChanged: (v) {
-                        final parsed = int.tryParse(v);
-                        if (parsed != null) {
-                          notifier.setDefaultDuration(parsed);
-                        }
-                      },
-                    ),
-                    const Divider(
-                      height: AppSpacing.xl * 2,
-                      color: AppColors.divider,
-                    ),
-                    TreatmentsManagementSection(
-                      treatments: state.treatments,
-                      onAdd: () => _openCreateTreatment(context, notifier),
-                    ),
-                  ],
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      GeneralDurationSection(
+                        duration: state.defaultDuration,
+                        onDurationChanged: (v) {
+                          final parsed = int.tryParse(v);
+                          if (parsed != null) {
+                            notifier.setDefaultDuration(parsed);
+                          }
+                        },
+                      ),
+                      const Divider(
+                        height: AppSpacing.xl * 2,
+                        color: AppColors.divider,
+                      ),
+                      if (_loadingTreatments &&
+                          state.treatments.isEmpty) ...[
+                        const SizedBox(height: AppSpacing.xl),
+                        const Center(
+                          child: SizedBox(
+                            width: 28,
+                            height: 28,
+                            child:
+                                CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.xl),
+                      ] else
+                        TreatmentsManagementSection(
+                          services: state.treatments,
+                          onAdd: () => _openCreateTreatment(context, notifier),
+                        ),
+                    ],
+                  ),
                 ),
               ),
-            ),
             ),
           ],
         ),
@@ -66,11 +115,11 @@ class TreatmentsScreen extends ConsumerWidget {
     );
   }
 
-  static void _openCreateTreatment(
+  Future<void> _openCreateTreatment(
     BuildContext context,
     SettingsController notifier,
-  ) {
-    showModalBottomSheet<void>(
+  ) async {
+    await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.cardSurface,
@@ -78,9 +127,17 @@ class TreatmentsScreen extends ConsumerWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (sheetContext) => CreateTreatmentModal(
-        onSubmit: (name) {
-          notifier.addTreatment(name);
-          Navigator.of(sheetContext).pop();
+        onSubmit: (name, duration) async {
+          try {
+            await notifier.addTreatment(name, duration);
+            if (sheetContext.mounted) Navigator.of(sheetContext).pop();
+          } on ApiException catch (e) {
+            if (sheetContext.mounted) {
+              ScaffoldMessenger.of(sheetContext).showSnackBar(
+                SnackBar(content: Text(e.message)),
+              );
+            }
+          }
         },
       ),
     );

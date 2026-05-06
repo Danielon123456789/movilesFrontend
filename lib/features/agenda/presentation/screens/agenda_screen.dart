@@ -11,10 +11,13 @@ import '../../../../shared/dialogs/confirm_delete_dialog.dart';
 import '../../../../shared/widgets/app_bottom_nav.dart';
 import '../../../../shared/widgets/app_screen_header.dart';
 import '../../../../shared/widgets/swipe_actions_row.dart';
-import '../../domain/entities/appointment.dart';
 import '../controllers/agenda_controller.dart';
+import '../models/appointment_view_model.dart';
+import '../providers/selected_day_appointments_providers.dart';
 import '../widgets/agenda_calendar_section.dart';
+import '../../../appointments/appointments_providers.dart';
 import '../widgets/create_appointment_modal.dart';
+import '../widgets/edit_appointment_modal.dart';
 import '../widgets/agenda_empty_state.dart';
 import '../widgets/appointment_card.dart';
 
@@ -29,8 +32,6 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
   bool _isExpanded = true;
   String? _selectedTherapist;
 
-  static const _appointmentDeletePendingMessage =
-      'La eliminación de citas desde la lista aún no está enlazada con el servidor.';
 
   static const _therapists = [
     'Todos',
@@ -43,12 +44,8 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(agendaControllerProvider);
-    final allAppointments = ref.watch(appointmentsForSelectedDateProvider);
-    final appointments = _selectedTherapist == null
-        ? allAppointments
-        : allAppointments
-              .where((a) => a.therapist == _selectedTherapist)
-              .toList();
+    final appointmentsAsync =
+        ref.watch(selectedDayAppointmentViewModelsProvider);
 
     final headerDate = DateFormat('EEEE, d \'de\' MMMM', 'es')
         .format(state.selectedDate)
@@ -180,28 +177,82 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                       endIndent: AppSpacing.md,
                     ),
                     if (_isExpanded) ...[
-                      if (appointments.isNotEmpty) ...[
-                        for (var i = 0; i < appointments.length; i++) ...[
-                          SwipeActionsRow(
-                            key: ValueKey('agenda_home_${appointments[i].id}'),
-                            groupTag: 'agenda_home',
-                            onEdit: () => context.push(
-                              '/agenda/detail',
-                              extra: appointments[i],
+                      ...appointmentsAsync.when(
+                        loading: () => [
+                          const SizedBox(height: AppSpacing.sm),
+                          const Center(
+                            child: SizedBox(
+                              width: 24,
+                              height: 24,
+                              child:
+                                  CircularProgressIndicator(strokeWidth: 2),
                             ),
-                            onDelete: () => _confirmDeleteAppointment(
-                              context,
-                              appointments[i],
+                          ),
+                        ],
+                        error: (e, _) => [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.md,
                             ),
-                            child: AppointmentCard(
-                              appointment: appointments[i],
-                              onTap: () => context.push(
-                                '/agenda/detail',
-                                extra: appointments[i],
+                            child: Text(
+                              'No se pudieron cargar las citas.',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
                               ),
                             ),
                           ),
-                          if (i < appointments.length - 1)
+                        ],
+                        data: (allVms) {
+                          final appointments = _selectedTherapist == null
+                              ? allVms
+                              : allVms
+                                    .where(
+                                      (vm) =>
+                                          vm.therapist ==
+                                          _selectedTherapist,
+                                    )
+                                    .toList();
+
+                          if (appointments.isEmpty) {
+                            return [const AgendaEmptyState()];
+                          }
+
+                          final widgets = <Widget>[
+                            for (var i = 0; i < appointments.length; i++) ...[
+                              SwipeActionsRow(
+                                key: ValueKey(
+                                  'agenda_home_${appointments[i].id}',
+                                ),
+                                groupTag: 'agenda_home',
+                                onEdit: () => _showEditAppointmentModal(
+                                  context,
+                                  appointments[i],
+                                ),
+                                onDelete: () => _confirmDeleteAppointment(
+                                  context,
+                                  appointments[i],
+                                ),
+                                child: AppointmentCard(
+                                  appointment: appointments[i],
+                                  onTap: () => context.push(
+                                    '/agenda/detail',
+                                    extra: appointments[i]
+                                        .toLegacyAgendaAppointment(),
+                                  ),
+                                ),
+                              ),
+                              if (i < appointments.length - 1)
+                                const Divider(
+                                  height: 1,
+                                  thickness: 1,
+                                  color: AppColors.divider,
+                                  indent: AppSpacing.md,
+                                  endIndent: AppSpacing.md,
+                                ),
+                            ],
                             const Divider(
                               height: 1,
                               thickness: 1,
@@ -209,16 +260,10 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                               indent: AppSpacing.md,
                               endIndent: AppSpacing.md,
                             ),
-                        ],
-                        const Divider(
-                          height: 1,
-                          thickness: 1,
-                          color: AppColors.divider,
-                          indent: AppSpacing.md,
-                          endIndent: AppSpacing.md,
-                        ),
-                      ] else
-                        const AgendaEmptyState(),
+                          ];
+                          return widgets;
+                        },
+                      ),
                     ],
                     const SizedBox(height: AppSpacing.md),
                   ],
@@ -249,19 +294,55 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
 
   Future<void> _confirmDeleteAppointment(
     BuildContext context,
-    Appointment appointment,
+    AppointmentViewModel appointment,
   ) async {
     final ok = await showConfirmDeleteDialog(
       context,
       title: 'Eliminar cita',
-      body:
-          '¿Seguro que deseas eliminar la cita "${appointment.title}"? '
-          'Esta acción no se guardará hasta que exista persistencia.',
+      body: '¿Seguro que deseas eliminar la cita de "${appointment.title}"?',
     );
     if (!ok || !context.mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text(_appointmentDeletePendingMessage)),
+    try {
+      await ref
+          .read(appointmentsRepositoryProvider)
+          .deleteAppointment(appointment.id);
+
+      final start = appointment.startDate.toLocal();
+      final agenda = ref.read(agendaControllerProvider);
+      final anchors = <DateTime>{
+        DateTime(start.year, start.month, 1),
+        DateTime(agenda.visibleMonth.year, agenda.visibleMonth.month, 1),
+        DateTime(agenda.selectedDate.year, agenda.selectedDate.month, 1),
+      };
+      for (final a in anchors) {
+        ref.invalidate(monthAppointmentsProvider(a));
+      }
+
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cita eliminada correctamente.')),
+      );
+    } on Exception catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al eliminar la cita: $e')),
+      );
+    }
+  }
+
+  static Future<void> _showEditAppointmentModal(
+    BuildContext context,
+    AppointmentViewModel appointment,
+  ) {
+    return showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => EditAppointmentModal(appointment: appointment),
     );
   }
 
