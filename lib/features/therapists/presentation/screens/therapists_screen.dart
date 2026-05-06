@@ -60,10 +60,7 @@ class TherapistsScreen extends ConsumerWidget {
       body: SafeArea(
         child: Column(
           children: [
-            const AppScreenHeader(
-              date: 'MIÉRCOLES, 18 DE MARZO',
-              title: 'Usuarios',
-            ),
+            const AppScreenHeader(title: 'Organización'),
             _SearchField(
               onChanged: (value) {
                 ref.read(userFilterProvider.notifier).setQuery(value);

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 class AppBottomNav extends StatelessWidget {
   const AppBottomNav({
     super.key,
@@ -33,7 +32,7 @@ class AppBottomNav extends StatelessWidget {
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.account_circle_outlined),
-          label: 'Usuarios',
+          label: 'Organización',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.person_outline),

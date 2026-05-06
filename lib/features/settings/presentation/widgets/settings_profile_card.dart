@@ -3,7 +3,6 @@ import 'package:agenda/models/user.model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../controllers/profile_image_provider.dart';
 

@@ -7,10 +7,6 @@ class PatientsHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const AppScreenHeader(
-      date: 'MIÉRCOLES, 18 DE MARZO',
-      title: 'Pacientes',
-    );
+    return const AppScreenHeader(title: 'Pacientes');
   }
 }
-

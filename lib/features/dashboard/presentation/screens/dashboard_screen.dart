@@ -22,10 +22,7 @@ class DashboardScreen extends ConsumerWidget {
       body: SafeArea(
         child: Column(
           children: [
-            const AppScreenHeader(
-              date: 'DOMINGO, 15 DE MARZO',
-              title: 'Dashboard',
-            ),
+            const AppScreenHeader(title: 'Dashboard'),
             Expanded(
               child: ListView(
                 children: [
@@ -73,11 +70,7 @@ class DashboardScreen extends ConsumerWidget {
           elevation: 4,
           tooltip: 'Configuración',
           shape: const CircleBorder(),
-          child: const Icon(
-            Icons.settings,
-            color: Colors.white,
-            size: 26,
-          ),
+          child: const Icon(Icons.settings, color: Colors.white, size: 26),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
@@ -121,7 +114,11 @@ class _PendientesSection extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: Theme.of(context).brightness == Brightness.dark ? 0.22 : 0.06),
+            color: Colors.black.withValues(
+              alpha: Theme.of(context).brightness == Brightness.dark
+                  ? 0.22
+                  : 0.06,
+            ),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),

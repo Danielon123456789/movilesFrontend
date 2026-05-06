@@ -4,10 +4,44 @@ import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_spacing.dart';
 
 class AppScreenHeader extends StatelessWidget {
-  const AppScreenHeader({super.key, required this.date, required this.title});
+  const AppScreenHeader({super.key, required this.title});
 
-  final String date;
   final String title;
+
+  String _getFormattedDate() {
+    final now = DateTime.now();
+
+    const days = [
+      'LUNES',
+      'MARTES',
+      'MIÉRCOLES',
+      'JUEVES',
+      'VIERNES',
+      'SÁBADO',
+      'DOMINGO',
+    ];
+
+    const months = [
+      'ENERO',
+      'FEBRERO',
+      'MARZO',
+      'ABRIL',
+      'MAYO',
+      'JUNIO',
+      'JULIO',
+      'AGOSTO',
+      'SEPTIEMBRE',
+      'OCTUBRE',
+      'NOVIEMBRE',
+      'DICIEMBRE',
+    ];
+
+    final dayName = days[now.weekday - 1];
+    final day = now.day;
+    final month = months[now.month - 1];
+
+    return '$dayName, $day DE $month';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +65,7 @@ class AppScreenHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  date,
+                  _getFormattedDate(),
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
@@ -77,9 +111,9 @@ class _NotificationButton extends StatelessWidget {
           child: InkWell(
             customBorder: const CircleBorder(),
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text(_pendingMessage)),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text(_pendingMessage)));
             },
             child: const Padding(
               padding: EdgeInsets.all(AppSpacing.sm),

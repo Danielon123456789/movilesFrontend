@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
@@ -32,7 +31,6 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
   bool _isExpanded = true;
   String? _selectedTherapist;
 
-
   static const _therapists = [
     'Todos',
     'Daniel Hernández',
@@ -44,21 +42,16 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(agendaControllerProvider);
-    final appointmentsAsync =
-        ref.watch(selectedDayAppointmentViewModelsProvider);
-
-    final headerDate = DateFormat('EEEE, d \'de\' MMMM', 'es')
-        .format(state.selectedDate)
-        .split(' ')
-        .map((s) => s[0].toUpperCase() + s.substring(1).toLowerCase())
-        .join(' ');
+    final appointmentsAsync = ref.watch(
+      selectedDayAppointmentViewModelsProvider,
+    );
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
-            AppScreenHeader(date: headerDate, title: 'Agenda'),
+            AppScreenHeader(title: 'Agenda'),
             Expanded(
               child: SlidableAutoCloseBehavior(
                 child: ListView(
@@ -184,8 +177,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                             child: SizedBox(
                               width: 24,
                               height: 24,
-                              child:
-                                  CircularProgressIndicator(strokeWidth: 2),
+                              child: CircularProgressIndicator(strokeWidth: 2),
                             ),
                           ),
                         ],
@@ -198,9 +190,9 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                               'No se pudieron cargar las citas.',
                               style: TextStyle(
                                 fontSize: 14,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                               ),
                             ),
                           ),
@@ -211,8 +203,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                               : allVms
                                     .where(
                                       (vm) =>
-                                          vm.therapist ==
-                                          _selectedTherapist,
+                                          vm.therapist == _selectedTherapist,
                                     )
                                     .toList();
 
@@ -325,9 +316,9 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
       );
     } on Exception catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al eliminar la cita: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error al eliminar la cita: $e')));
     }
   }
 
