@@ -1,8 +1,8 @@
+import 'package:agenda/models/user.model.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
-import '../../domain/entities/therapist.dart';
 
 class TherapistCard extends StatelessWidget {
   const TherapistCard({
@@ -13,7 +13,7 @@ class TherapistCard extends StatelessWidget {
     this.onMenuDelete,
   });
 
-  final Therapist therapist;
+  final User therapist;
   final VoidCallback? onTap;
 
   /// Menú ⋮ superior derecha. Si ambos son null, no se muestra el botón.
@@ -23,9 +23,9 @@ class TherapistCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    // final textTheme = Theme.of(context).textTheme;
 
-    final hasMenu = onMenuEdit != null || onMenuDelete != null;
+    // final hasMenu = onMenuEdit != null || onMenuDelete != null;
 
     return GestureDetector(
       onTap: onTap,
@@ -63,56 +63,60 @@ class TherapistCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(child: _TherapistIdentity(therapist: therapist)),
-                if (hasMenu)
-                  PopupMenuButton<String>(
-                    padding: const EdgeInsets.only(top: 8, right: 4),
-                    splashRadius: 26,
-                    iconSize: 28,
-                    icon: Icon(
-                      Icons.more_vert,
-                      color: colorScheme.onSurfaceVariant,
-                      size: 28,
-                    ),
-                    offset: const Offset(0, 6),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    color: colorScheme.surface,
-                    elevation: 2,
-                    itemBuilder: (context) => [
-                      if (onMenuEdit != null)
-                        const PopupMenuItem<String>(
-                          value: 'edit',
-                          child: Text('Editar'),
-                        ),
-                      if (onMenuDelete != null)
-                        PopupMenuItem<String>(
-                          value: 'delete',
-                          child: Text(
-                            'Eliminar',
-                            style: TextStyle(color: AppColors.error),
-                          ),
-                        ),
-                    ],
-                    onSelected: (value) {
-                      switch (value) {
-                        case 'edit':
-                          onMenuEdit?.call();
-                          break;
-                        case 'delete':
-                          onMenuDelete?.call();
-                          break;
-                      }
-                    },
-                  ),
+                // if (hasMenu)
+                //   PopupMenuButton<String>(
+                //     padding: const EdgeInsets.only(top: 8, right: 4),
+                //     splashRadius: 26,
+                //     iconSize: 28,
+                //     icon: Icon(
+                //       Icons.more_vert,
+                //       color: AppColors.textMuted,
+                //       size: 28,
+                //     ),
+                //     offset: const Offset(0, 6),
+                //     shape: RoundedRectangleBorder(
+                //       borderRadius: BorderRadius.circular(12),
+                //     ),
+                //     color: AppColors.cardSurface,
+                //     elevation: 2,
+                //     itemBuilder: (context) => [
+                //       if (onMenuEdit != null)
+                //         const PopupMenuItem<String>(
+                //           value: 'edit',
+                //           child: Text('Editar'),
+                //         ),
+                //       if (onMenuDelete != null)
+                //         PopupMenuItem<String>(
+                //           value: 'delete',
+                //           child: Text(
+                //             'Eliminar',
+                //             style: TextStyle(color: AppColors.error),
+                //           ),
+                //         ),
+                //     ],
+                //     onSelected: (value) {
+                //       switch (value) {
+                //         case 'edit':
+                //           onMenuEdit?.call();
+                //           break;
+                //         case 'delete':
+                //           onMenuDelete?.call();
+                //           break;
+                //       }
+                //     },
+                //   ),
               ],
             ),
             const SizedBox(height: AppSpacing.md),
-            _EmailRow(email: therapist.email),
-            const SizedBox(height: AppSpacing.md),
-            _ScheduleSection(
-              schedule: therapist.schedule,
-              textTheme: textTheme,
+            _DataRow(icon: Icons.mail_outline, text: therapist.email),
+            const SizedBox(height: AppSpacing.sm),
+            _DataRow(icon: Icons.phone, text: therapist.phoneNumber ?? ''),
+            const SizedBox(height: AppSpacing.sm),
+            _DataRow(
+              icon: Icons.person,
+              text: therapist.role == Role.therapist
+                  ? 'Terapeuta'
+                  : 'Secretario(a)',
             ),
           ],
         ),
@@ -124,7 +128,7 @@ class TherapistCard extends StatelessWidget {
 class _TherapistIdentity extends StatelessWidget {
   const _TherapistIdentity({required this.therapist});
 
-  final Therapist therapist;
+  final User therapist;
 
   @override
   Widget build(BuildContext context) {
@@ -137,9 +141,9 @@ class _TherapistIdentity extends StatelessWidget {
           radius: 24,
           backgroundColor: colorScheme.primary,
           child: Text(
-            therapist.initials,
-            style: TextStyle(
-              color: colorScheme.onPrimary,
+            therapist.name?[0] ?? '',
+            style: const TextStyle(
+              color: Colors.white,
               fontSize: 14,
               fontWeight: FontWeight.w700,
             ),
@@ -151,16 +155,9 @@ class _TherapistIdentity extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                therapist.name,
+                therapist.name ?? '',
                 style: textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                therapist.specialty,
-                style: textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -171,10 +168,11 @@ class _TherapistIdentity extends StatelessWidget {
   }
 }
 
-class _EmailRow extends StatelessWidget {
-  const _EmailRow({required this.email});
+class _DataRow extends StatelessWidget {
+  const _DataRow({required this.icon, required this.text});
 
-  final String email;
+  final IconData icon;
+  final String text;
 
   @override
   Widget build(BuildContext context) {
@@ -182,11 +180,11 @@ class _EmailRow extends StatelessWidget {
 
     return Row(
       children: [
-        Icon(Icons.mail_outline, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
+        Icon(icon as IconData?, size: 18, color: AppColors.textMuted),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: Text(
-            email,
+            text,
             style: Theme.of(
               context,
             ).textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface),
@@ -198,79 +196,79 @@ class _EmailRow extends StatelessWidget {
   }
 }
 
-class _ScheduleSection extends StatelessWidget {
-  const _ScheduleSection({required this.schedule, required this.textTheme});
+// class _ScheduleSection extends StatelessWidget {
+//   const _ScheduleSection({required this.schedule, required this.textTheme});
 
-  final List<TherapistSchedule> schedule;
-  final TextTheme textTheme;
+//   final List<TherapistSchedule> schedule;
+//   final TextTheme textTheme;
 
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+//   @override
+//   Widget build(BuildContext context) {
+//     final colorScheme = Theme.of(context).colorScheme;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(
-              Icons.access_time_outlined,
-              size: 18,
-              color: colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Text(
-              'Horario Laboral',
-              style: textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                  color: colorScheme.onSurface,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: colorScheme.outlineVariant),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            children: [
-              for (var i = 0; i < schedule.length; i++) ...[
-                if (i > 0)
-                  const Divider(height: 1, color: AppColors.subtleBorder),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md,
-                    vertical: AppSpacing.sm + 2,
-                  ),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: 40,
-                        child: Text(
-                          schedule[i].day,
-                          style: textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: colorScheme.onSurface,
-                          ),
-                        ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        schedule[i].timeRange,
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
+//     return Column(
+//       crossAxisAlignment: CrossAxisAlignment.start,
+//       children: [
+//         Row(
+//           children: [
+//             Icon(
+//               Icons.access_time_outlined,
+//               size: 18,
+//               color: colorScheme.onSurfaceVariant,
+//             ),
+//             const SizedBox(width: AppSpacing.sm),
+//             Text(
+//               'Horario Laboral',
+//               style: textTheme.bodyMedium?.copyWith(
+//                 fontWeight: FontWeight.w600,
+//                   color: colorScheme.onSurface,
+//               ),
+//             ),
+//           ],
+//         ),
+//         const SizedBox(height: AppSpacing.sm),
+//         Container(
+//           decoration: BoxDecoration(
+//             border: Border.all(color: colorScheme.outlineVariant),
+//             borderRadius: BorderRadius.circular(12),
+//           ),
+//           child: Column(
+//             children: [
+//               for (var i = 0; i < schedule.length; i++) ...[
+//                 if (i > 0)
+//                   const Divider(height: 1, color: AppColors.subtleBorder),
+//                 Padding(
+//                   padding: const EdgeInsets.symmetric(
+//                     horizontal: AppSpacing.md,
+//                     vertical: AppSpacing.sm + 2,
+//                   ),
+//                   child: Row(
+//                     children: [
+//                       SizedBox(
+//                         width: 40,
+//                         child: Text(
+//                           schedule[i].day,
+//                           style: textTheme.bodyMedium?.copyWith(
+//                             fontWeight: FontWeight.w600,
+//                             color: colorScheme.onSurface,
+//                           ),
+//                         ),
+//                       ),
+//                       const Spacer(),
+//                       Text(
+//                         schedule[i].timeRange,
+//                         style: textTheme.bodyMedium?.copyWith(
+//                           color: colorScheme.onSurfaceVariant,
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                 ),
+//               ],
+//             ],
+//           ),
+//         ),
+//       ],
+//     );
+//   }
+// }
