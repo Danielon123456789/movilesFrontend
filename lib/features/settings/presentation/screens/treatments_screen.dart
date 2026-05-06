@@ -27,11 +27,14 @@ class TreatmentsScreen extends ConsumerWidget {
               onBack: () => Navigator.of(context).maybePop(),
             ),
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.lg,
-                  vertical: AppSpacing.md,
-                ),
+              child: RefreshIndicator(
+                onRefresh: () => ref.read(settingsControllerProvider.notifier).fetchTreatments(),
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                    vertical: AppSpacing.md,
+                  ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -55,6 +58,7 @@ class TreatmentsScreen extends ConsumerWidget {
                   ],
                 ),
               ),
+            ),
             ),
           ],
         ),

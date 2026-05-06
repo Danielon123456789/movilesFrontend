@@ -1,78 +1,194 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:agenda/core/network/api_exception.dart';
 
 import '../../domain/entities/therapist.dart';
+import '../../therapists_providers.dart';
 
 class TherapistsState {
-  const TherapistsState({required this.therapists, required this.query});
+  const TherapistsState({
+    required this.therapists,
+    required this.query,
+    required this.isLoading,
+    this.errorMessage,
+  });
 
   final List<Therapist> therapists;
   final String query;
+  final bool isLoading;
+  final String? errorMessage;
 
-  TherapistsState copyWith({List<Therapist>? therapists, String? query}) {
+  TherapistsState copyWith({
+    List<Therapist>? therapists,
+    String? query,
+    bool? isLoading,
+    String? Function()? errorMessage,
+  }) {
     return TherapistsState(
       therapists: therapists ?? this.therapists,
       query: query ?? this.query,
+      isLoading: isLoading ?? this.isLoading,
+      errorMessage: errorMessage != null ? errorMessage() : this.errorMessage,
     );
   }
 }
 
 class TherapistsController extends Notifier<TherapistsState> {
+  bool get _alive => ref.mounted;
+
   @override
   TherapistsState build() {
-    return const TherapistsState(therapists: _mockTherapists, query: '');
+    Future.microtask(fetchTherapists);
+    return const TherapistsState(
+      therapists: [],
+      query: '',
+      isLoading: true,
+      errorMessage: null,
+    );
+  }
+
+  Future<void> fetchTherapists() async {
+    final repo = ref.read(therapistsRepositoryProvider);
+    try {
+      final list = await repo.fetchTherapists();
+      if (!_alive) return;
+      state = state.copyWith(
+        therapists: list,
+        isLoading: false,
+        errorMessage: () => null,
+      );
+    } on ApiException catch (e) {
+      if (!_alive) return;
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: () => e.message,
+      );
+    } catch (e) {
+      if (!_alive) return;
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: () => 'Error inesperado: \$e',
+      );
+    }
   }
 
   void setQuery(String value) {
     state = state.copyWith(query: value);
   }
 
-  void removeTherapist(String id) {
-    state = state.copyWith(
-      therapists: state.therapists.where((t) => t.id != id).toList(),
-    );
+  Future<void> removeTherapist(String id) {
+    return Future.microtask(() async {
+      final repo = ref.read(therapistsRepositoryProvider);
+      state = state.copyWith(isLoading: true, errorMessage: () => null);
+      try {
+        await repo.deleteTherapist(id);
+        if (!_alive) return;
+        state = state.copyWith(
+          therapists: state.therapists.where((t) => t.id != id).toList(),
+          isLoading: false,
+          errorMessage: () => null,
+        );
+      } on ApiException catch (e) {
+        if (!_alive) return;
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: () => e.message,
+        );
+      } catch (e) {
+        if (!_alive) return;
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: () => 'Error inesperado: \$e',
+        );
+      }
+    });
+  }
+
+  Future<void> updateTherapist(
+    String id, {
+    String? name,
+    String? email,
+    String? phoneNumber,
+    String? specialty,
+  }) {
+    return Future.microtask(() async {
+      final repo = ref.read(therapistsRepositoryProvider);
+      state = state.copyWith(isLoading: true, errorMessage: () => null);
+      try {
+        final fresh = await repo.updateTherapist(
+          id,
+          name: name,
+          email: email,
+          phoneNumber: phoneNumber,
+        );
+        if (!_alive) return;
+        final idx = state.therapists.indexWhere((t) => t.id == id);
+        if (idx < 0) {
+          state = state.copyWith(
+            isLoading: false,
+            errorMessage: () => null,
+          );
+          return;
+        }
+        final next = List<Therapist>.from(state.therapists);
+        next[idx] = fresh;
+        state = state.copyWith(
+          therapists: next,
+          isLoading: false,
+          errorMessage: () => null,
+        );
+      } on ApiException catch (e) {
+        if (!_alive) return;
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: () => e.message,
+        );
+      } catch (e) {
+        if (!_alive) return;
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: () => 'Error inesperado: \$e',
+        );
+      }
+    });
+  }
+
+  Future<void> addTherapist({
+    required String name,
+    String? email,
+    String? phoneNumber,
+    String? specialty,
+  }) {
+    return Future.microtask(() async {
+      final repo = ref.read(therapistsRepositoryProvider);
+      state = state.copyWith(isLoading: true, errorMessage: () => null);
+      try {
+        final therapist = await repo.createTherapist(
+          name: name,
+          email: email,
+          phoneNumber: phoneNumber,
+        );
+        if (!_alive) return;
+        state = state.copyWith(
+          therapists: [therapist, ...state.therapists],
+          isLoading: false,
+          errorMessage: () => null,
+        );
+      } on ApiException catch (e) {
+        if (!_alive) return;
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: () => e.message,
+        );
+      } catch (e) {
+        if (!_alive) return;
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: () => 'Error inesperado: \$e',
+        );
+      }
+    });
   }
 }
-
-const _mockTherapists = [
-  Therapist(
-    id: '1',
-    name: 'Dr. Juan Pérez',
-    specialty: 'Fisioterapia',
-    email: 'juan.perez@clinica.con',
-    initials: 'DJP',
-    schedule: [
-      TherapistSchedule(day: 'Lun', timeRange: '07:00 - 15:00'),
-      TherapistSchedule(day: 'Mar', timeRange: '07:00 - 15:00'),
-      TherapistSchedule(day: 'Mié', timeRange: '07:00 - 15:00'),
-      TherapistSchedule(day: 'Jue', timeRange: '07:00 - 15:00'),
-      TherapistSchedule(day: 'Vie', timeRange: '07:00 - 15:00'),
-    ],
-  ),
-  Therapist(
-    id: '2',
-    name: 'Dra. Laura Sánchez',
-    specialty: 'Psicología Clínica',
-    email: 'laura.sanchez@clinica.cor',
-    initials: 'DLS',
-    schedule: [
-      TherapistSchedule(day: 'Lun', timeRange: '09:00 - 18:00'),
-      TherapistSchedule(day: 'Mié', timeRange: '09:00 - 18:00'),
-      TherapistSchedule(day: 'Vie', timeRange: '09:00 - 18:00'),
-    ],
-  ),
-  Therapist(
-    id: '3',
-    name: 'Dr. Carlos Ramírez',
-    specialty: 'Quiropráctica',
-    email: 'carlos.ramirez@clinica.com',
-    initials: 'DCR',
-    schedule: [
-      TherapistSchedule(day: 'Mar', timeRange: '08:00 - 16:00'),
-      TherapistSchedule(day: 'Jue', timeRange: '08:00 - 16:00'),
-      TherapistSchedule(day: 'Sáb', timeRange: '09:00 - 13:00'),
-    ],
-  ),
-];
 
 final therapistsControllerProvider =
     NotifierProvider<TherapistsController, TherapistsState>(

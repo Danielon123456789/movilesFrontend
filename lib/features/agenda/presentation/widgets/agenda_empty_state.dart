@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 
 class AgendaEmptyState extends StatelessWidget {
@@ -8,6 +7,9 @@ class AgendaEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Padding(
       padding: const EdgeInsets.all(48),
       child: Column(
@@ -18,12 +20,12 @@ class AgendaEmptyState extends StatelessWidget {
             height: 120,
           ),
           const SizedBox(height: AppSpacing.md),
-          const Text(
+          Text(
             'Por el momento no tienes citas',
-            style: TextStyle(
+            style: textTheme.bodyMedium?.copyWith(
               fontSize: 15,
               fontWeight: FontWeight.w400,
-              color: AppColors.textMuted,
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
         ],

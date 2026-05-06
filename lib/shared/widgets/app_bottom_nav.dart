@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../app/theme/app_colors.dart';
 
 class AppBottomNav extends StatelessWidget {
   const AppBottomNav({
@@ -14,12 +13,15 @@ class AppBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return BottomNavigationBar(
       currentIndex: currentIndex,
       onTap: onTap,
       type: BottomNavigationBarType.fixed,
-      selectedItemColor: AppColors.chipActiveFg,
-      unselectedItemColor: Theme.of(context).colorScheme.onSurfaceVariant,
+      backgroundColor: colorScheme.surface,
+      selectedItemColor: colorScheme.primary,
+      unselectedItemColor: colorScheme.onSurfaceVariant,
       items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.calendar_month_outlined),

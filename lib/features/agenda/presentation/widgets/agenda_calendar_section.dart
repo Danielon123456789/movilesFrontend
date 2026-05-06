@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../controllers/agenda_controller.dart';
 import 'agenda_day_cell.dart';
@@ -19,6 +18,7 @@ class AgendaCalendarSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final state = ref.watch(agendaControllerProvider);
     final notifier = ref.read(agendaControllerProvider.notifier);
     final cells = visibleGridCells(state.visibleMonth);
@@ -46,18 +46,18 @@ class AgendaCalendarSection extends ConsumerWidget {
               Text.rich(
                 TextSpan(
                   text: '$datePortion ',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: colorScheme.onSurface,
                   ),
                   children: [
                     TextSpan(
                       text: weekday,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textMuted,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -93,7 +93,7 @@ class AgendaCalendarSection extends ConsumerWidget {
                     child: Text(
                       label,
                       style: textTheme.labelSmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        color: colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w600,
                       ),
                     ),

@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
+import '../../../../controllers/profile_image_provider.dart';
 
 /// Perfil compacto en Configuración (avatar + nombre + rol, correo y teléfono).
-class SettingsProfileCard extends StatelessWidget {
+class SettingsProfileCard extends ConsumerWidget {
   const SettingsProfileCard({super.key});
 
   static const _email = 'juan.perez@clinica.com';
   static const _phone = '+52 55 1234 5678';
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final onVariant = Theme.of(context).colorScheme.onSurfaceVariant;
+    final profileImage = ref.watch(profileImageProvider);
 
     return Container(
       width: double.infinity,
@@ -21,12 +25,14 @@ class SettingsProfileCard extends StatelessWidget {
         vertical: AppSpacing.md,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.subtleBorder),
+        border: Border.all(color: colorScheme.outlineVariant),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: Colors.black.withValues(
+              alpha: Theme.of(context).brightness == Brightness.dark ? 0.22 : 0.04,
+            ),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -38,10 +44,18 @@ class SettingsProfileCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              CircleAvatar(
-                radius: 28,
-                backgroundColor: AppColors.bgCanvas,
-                child: Icon(Icons.person, size: 32, color: onVariant),
+              GestureDetector(
+                onTap: () {
+                  ref.read(profileImageProvider.notifier).pickAndSaveImage();
+                },
+                child: CircleAvatar(
+                  radius: 28,
+                  backgroundColor: colorScheme.surfaceContainerHighest,
+                  backgroundImage: profileImage != null ? FileImage(profileImage) : null,
+                  child: profileImage == null
+                      ? Icon(Icons.person, size: 32, color: onVariant)
+                      : null,
+                ),
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
@@ -73,7 +87,7 @@ class SettingsProfileCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           Divider(
             height: 1,
-            color: AppColors.subtleBorder.withValues(alpha: 0.8),
+            color: colorScheme.outlineVariant,
           ),
           const SizedBox(height: AppSpacing.md),
           _ContactRow(
@@ -106,6 +120,7 @@ class _ContactRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -115,7 +130,7 @@ class _ContactRow extends StatelessWidget {
           child: Text(
             text,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textPrimary,
+              color: colorScheme.onSurface,
               fontWeight: FontWeight.w400,
               fontSize: 15,
             ),

@@ -81,6 +81,12 @@ class SettingsController extends Notifier<SettingsState> {
     state = state.copyWith(notificationsEnabled: value);
   }
 
+  Future<void> fetchTreatments() async {
+    // Simulator for backend update
+    await Future.delayed(const Duration(milliseconds: 800));
+    // In a real app this would fetch and replace the state.treatments
+  }
+
   void setReminderHours(String value) {
     state = state.copyWith(reminderHours: value);
   }
@@ -93,6 +99,26 @@ class SettingsController extends Notifier<SettingsState> {
           Colors.primaries[state.treatments.length % Colors.primaries.length],
     );
     state = state.copyWith(treatments: [...state.treatments, newTreatment]);
+  }
+
+  void editTreatment(int index, String newName) {
+    if (index >= 0 && index < state.treatments.length) {
+      final updatedTreatments = [...state.treatments];
+      updatedTreatments[index] = Treatment(
+        name: newName,
+        durationMinutes: updatedTreatments[index].durationMinutes,
+        color: updatedTreatments[index].color,
+      );
+      state = state.copyWith(treatments: updatedTreatments);
+    }
+  }
+
+  void deleteTreatment(int index) {
+    if (index >= 0 && index < state.treatments.length) {
+      final updatedTreatments = [...state.treatments];
+      updatedTreatments.removeAt(index);
+      state = state.copyWith(treatments: updatedTreatments);
+    }
   }
 }
 

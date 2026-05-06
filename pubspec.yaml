@@ -43,6 +43,10 @@ dependencies:
   google_sign_in: ^6.3.0
   firebase_ui_auth: ^3.0.1
   flutter_slidable: ^4.0.3
+  image_picker: ^1.2.2
+  path_provider: ^2.1.5
+  shared_preferences: ^2.5.5
+  path: ^1.9.1
 
 dev_dependencies:
   flutter_test:

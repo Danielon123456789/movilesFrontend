@@ -71,6 +71,7 @@ class _CreatePatientModalState extends State<CreatePatientModal> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
     return SafeArea(
@@ -94,7 +95,7 @@ class _CreatePatientModalState extends State<CreatePatientModal> {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: AppColors.subtleBorder,
+                      color: colorScheme.outlineVariant,
                       borderRadius: BorderRadius.circular(999),
                     ),
                   ),
@@ -104,7 +105,7 @@ class _CreatePatientModalState extends State<CreatePatientModal> {
                   _isEditing ? 'Editar paciente' : 'Nuevo paciente',
                   style: textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.md),
@@ -192,7 +193,7 @@ class _CreatePatientModalState extends State<CreatePatientModal> {
                   child: ElevatedButton(
                     onPressed: _submit,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.chipActiveFg,
+                      backgroundColor: AppColors.accentBlue,
                       foregroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
@@ -253,6 +254,7 @@ class _ModalInputField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -261,7 +263,7 @@ class _ModalInputField extends StatelessWidget {
           label,
           style: textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
@@ -278,25 +280,27 @@ class _ModalInputField extends StatelessWidget {
 }
 
 InputDecoration _modalInputDecoration(BuildContext context, String hintText) {
+  final colorScheme = Theme.of(context).colorScheme;
+
   return InputDecoration(
     hintText: hintText,
     filled: true,
-    fillColor: AppColors.surface,
+    fillColor: colorScheme.surface,
     contentPadding: const EdgeInsets.symmetric(
       horizontal: AppSpacing.md,
       vertical: 14,
     ),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: AppColors.subtleBorder),
+      borderSide: BorderSide(color: colorScheme.outlineVariant),
     ),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: AppColors.subtleBorder),
+      borderSide: BorderSide(color: colorScheme.outlineVariant),
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: AppColors.chipActiveFg, width: 1.5),
+      borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
     ),
     errorBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),

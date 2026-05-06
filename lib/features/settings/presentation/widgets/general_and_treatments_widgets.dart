@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../controllers/settings_controller.dart';
+import 'edit_treatment_modal.dart';
 
 /// Título de bloque compartido (también usado desde [SettingsScreen] en notificaciones).
 class SettingsSectionTitle extends StatelessWidget {
@@ -17,9 +19,10 @@ class SettingsSectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Row(
       children: [
-        Icon(icon, size: 22, color: AppColors.textPrimary),
+        Icon(icon, size: 22, color: colorScheme.onSurface),
         const SizedBox(width: AppSpacing.sm),
         Text(
           title,
@@ -116,8 +119,11 @@ class TreatmentsManagementSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: AppSpacing.md),
-        for (final t in treatments) ...[
-          _TreatmentExpansionTile(treatment: t),
+        for (int i = 0; i < treatments.length; i++) ...[
+          _TreatmentExpansionTile(
+            treatment: treatments[i],
+            index: i,
+          ),
           const SizedBox(height: AppSpacing.sm),
         ],
       ],
@@ -125,18 +131,23 @@ class TreatmentsManagementSection extends StatelessWidget {
   }
 }
 
-class _TreatmentExpansionTile extends StatelessWidget {
-  const _TreatmentExpansionTile({required this.treatment});
+class _TreatmentExpansionTile extends ConsumerWidget {
+  const _TreatmentExpansionTile({
+    required this.treatment,
+    required this.index,
+  });
 
   final Treatment treatment;
+  final int index;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     return ClipRRect(
       borderRadius: BorderRadius.circular(14),
       child: ExpansionTile(
-        collapsedBackgroundColor: AppColors.cardSurface,
-        backgroundColor: AppColors.cardSurface,
+        collapsedBackgroundColor: colorScheme.surface,
+        backgroundColor: colorScheme.surface,
         shape: const Border(),
         title: Row(
           children: [
@@ -176,35 +187,24 @@ class _TreatmentExpansionTile extends StatelessWidget {
           ],
         ),
         children: [
-          const Divider(height: 1, color: AppColors.subtleBorder),
+          Divider(height: 1, color: colorScheme.outlineVariant),
           _tileOption(
             context,
+            ref,
             icon: Icons.edit_outlined,
             text: 'Editar',
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'Funcionalidad para editar tratamiento pendiente.',
-                  ),
-                ),
-              );
-            },
+            onTap: () => _openEditTreatment(context, ref),
           ),
-          const Divider(height: 1, color: AppColors.subtleBorder),
+          Divider(height: 1, color: colorScheme.outlineVariant),
           _tileOption(
             context,
+            ref,
             icon: Icons.delete_outline,
             text: 'Eliminar',
             color: AppColors.error,
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'Funcionalidad para eliminar tratamiento pendiente.',
-                  ),
-                ),
-              );
+              ref.read(settingsControllerProvider.notifier).deleteTreatment(index);
+              Navigator.of(context).maybePop();
             },
           ),
         ],
@@ -212,8 +212,27 @@ class _TreatmentExpansionTile extends StatelessWidget {
     );
   }
 
+  void _openEditTreatment(BuildContext context, WidgetRef ref) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetContext) => EditTreatmentModal(
+        initialName: treatment.name,
+        onSubmit: (newName) {
+          ref.read(settingsControllerProvider.notifier).editTreatment(index, newName);
+          Navigator.of(sheetContext).pop();
+        },
+      ),
+    );
+  }
+
   Widget _tileOption(
-    BuildContext context, {
+    BuildContext context,
+    WidgetRef ref, {
     required IconData icon,
     required String text,
     required VoidCallback onTap,
@@ -267,22 +286,22 @@ class SettingsOutlinedTextField extends StatelessWidget {
       keyboardType: keyboardType,
       decoration: InputDecoration(
         filled: true,
-        fillColor: AppColors.cardSurface,
+        fillColor: Theme.of(context).colorScheme.surface,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
           vertical: AppSpacing.md,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppColors.subtleBorder),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppColors.subtleBorder),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppColors.accentBlue),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
         ),
       ),
     );

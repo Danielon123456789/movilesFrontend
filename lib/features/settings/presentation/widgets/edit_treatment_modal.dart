@@ -3,18 +3,29 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 
-class CreateTreatmentModal extends StatefulWidget {
-  const CreateTreatmentModal({super.key, required this.onSubmit});
+class EditTreatmentModal extends StatefulWidget {
+  const EditTreatmentModal({
+    super.key,
+    required this.initialName,
+    required this.onSubmit,
+  });
 
+  final String initialName;
   final ValueChanged<String> onSubmit;
 
   @override
-  State<CreateTreatmentModal> createState() => _CreateTreatmentModalState();
+  State<EditTreatmentModal> createState() => _EditTreatmentModalState();
 }
 
-class _CreateTreatmentModalState extends State<CreateTreatmentModal> {
+class _EditTreatmentModalState extends State<EditTreatmentModal> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
+  late final TextEditingController _nameController;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.initialName);
+  }
 
   @override
   void dispose() {
@@ -24,7 +35,6 @@ class _CreateTreatmentModalState extends State<CreateTreatmentModal> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
     return SafeArea(
@@ -48,17 +58,17 @@ class _CreateTreatmentModalState extends State<CreateTreatmentModal> {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: colorScheme.outlineVariant,
+                      color: AppColors.subtleBorder,
                       borderRadius: BorderRadius.circular(999),
                     ),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.md),
                 Text(
-                  'Nuevo tratamiento',
+                  'Editar tratamiento',
                   style: textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: colorScheme.onSurface,
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.md),
@@ -94,7 +104,7 @@ class _CreateTreatmentModalState extends State<CreateTreatmentModal> {
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    child: const Text('Crear tratamiento'),
+                    child: const Text('Guardar cambios'),
                   ),
                 ),
               ],

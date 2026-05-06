@@ -57,7 +57,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
         .join(' ');
 
     return Scaffold(
-      backgroundColor: AppColors.bgCanvas,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -141,10 +141,10 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                 horizontal: 14,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.surface,
+                                color: Theme.of(context).colorScheme.surface,
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
-                                  color: AppColors.appointmentAccent,
+                                  color: Theme.of(context).colorScheme.primary,
                                 ),
                               ),
                               child: Row(
@@ -289,7 +289,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.cardSurface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),

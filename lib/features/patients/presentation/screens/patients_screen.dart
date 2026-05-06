@@ -28,20 +28,23 @@ class PatientsScreen extends ConsumerWidget {
     final state = ref.watch(patientsControllerProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.bgCanvas,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
             const PatientsHeader(),
             Expanded(
-              child: SlidableAutoCloseBehavior(
-                child: ListView(
-                  children: [
-                    PatientsSearchField(
-                      onChanged: (value) => ref
-                          .read(patientsControllerProvider.notifier)
-                          .setQuery(value),
-                    ),
+              child: RefreshIndicator(
+                onRefresh: () => ref.read(patientsControllerProvider.notifier).fetchPatients(),
+                child: SlidableAutoCloseBehavior(
+                  child: ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      PatientsSearchField(
+                        onChanged: (value) => ref
+                            .read(patientsControllerProvider.notifier)
+                            .setQuery(value),
+                      ),
                     PatientsSummaryRow(
                       countLabel: '${patients.length} pacientes',
                       filterLabel: _filterLabel(state.filter),
@@ -56,13 +59,13 @@ class PatientsScreen extends ConsumerWidget {
                           AppSpacing.md,
                         ),
                         child: Material(
-                          color: AppColors.cardSurface,
+                          color: Theme.of(context).colorScheme.surface,
                           elevation: 6,
-                          shadowColor: Colors.black.withValues(alpha: 0.08),
+                          shadowColor: Colors.black.withValues(alpha: Theme.of(context).brightness == Brightness.dark ? 0.22 : 0.08),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(18),
-                            side: const BorderSide(
-                              color: AppColors.subtleBorder,
+                            side: BorderSide(
+                              color: Theme.of(context).colorScheme.outlineVariant,
                             ),
                           ),
                           clipBehavior: Clip.antiAlias,
@@ -89,6 +92,7 @@ class PatientsScreen extends ConsumerWidget {
                   ],
                 ),
               ),
+            ),
             ),
           ],
         ),
@@ -167,7 +171,7 @@ class PatientsScreen extends ConsumerWidget {
     return showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
-      backgroundColor: AppColors.cardSurface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
       ),
@@ -232,7 +236,7 @@ class PatientsScreen extends ConsumerWidget {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.cardSurface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),

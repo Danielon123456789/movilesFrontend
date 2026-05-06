@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -22,7 +22,7 @@ class TherapistsScreen extends ConsumerWidget {
     final therapists = ref.watch(filteredTherapistsProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.bgCanvas,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -31,31 +31,31 @@ class TherapistsScreen extends ConsumerWidget {
               title: 'Terapeutas',
             ),
             Expanded(
-              child: ListView(
-                children: [
-                  _SearchField(
-                    onChanged: (value) => ref
-                        .read(therapistsControllerProvider.notifier)
-                        .setQuery(value),
-                  ),
-                  TherapistsSummaryRow(
-                    countLabel: '${therapists.length} terapeutas',
-                    onTreatmentsTap: () =>
-                        context.push(Routes.therapistsTreatments),
-                  ),
-                  for (final t in therapists)
-                    TherapistCard(
-                      therapist: t,
-                      onMenuEdit: () {
-                        debugPrint(
-                          '[TherapistCard] editar id=${t.id} nombre=${t.name}',
-                        );
-                      },
-                      onMenuDelete: () =>
-                          _confirmRemoveTherapist(context, ref, t),
+              child: RefreshIndicator(
+                onRefresh: () => ref.read(therapistsControllerProvider.notifier).fetchTherapists(),
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: [
+                    _SearchField(
+                      onChanged: (value) => ref
+                          .read(therapistsControllerProvider.notifier)
+                          .setQuery(value),
                     ),
-                  const SizedBox(height: AppSpacing.lg),
-                ],
+                    TherapistsSummaryRow(
+                      countLabel: '${therapists.length} terapeutas',
+                      onTreatmentsTap: () =>
+                          context.push(Routes.therapistsTreatments),
+                    ),
+                    for (final t in therapists)
+                      TherapistCard(
+                        therapist: t,
+                        onMenuEdit: () => _showTherapistFormModal(context, ref, t),
+                        onMenuDelete: () =>
+                            _confirmRemoveTherapist(context, ref, t),
+                      ),
+                    const SizedBox(height: AppSpacing.lg),
+                  ],
+                ),
               ),
             ),
           ],
@@ -64,7 +64,7 @@ class TherapistsScreen extends ConsumerWidget {
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 8),
         child: FloatingActionButton(
-          onPressed: () => _showCreateTherapistModal(context),
+          onPressed: () => _showTherapistFormModal(context, ref),
           backgroundColor: AppColors.accentBlue,
           elevation: 4,
           shape: const CircleBorder(),
@@ -102,20 +102,40 @@ class TherapistsScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _showCreateTherapistModal(BuildContext context) {
+  Future<void> _showTherapistFormModal(BuildContext context, WidgetRef ref, [Therapist? therapist]) {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.cardSurface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (sheetContext) => CreateTherapistModal(
+      builder: (sheetContext) => TherapistFormModal(
+        initialData: therapist,
         onSubmit: (data) {
           Navigator.of(sheetContext).pop();
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Este botón creará un terapeuta')),
-          );
+          if (therapist == null) {
+            ref.read(therapistsControllerProvider.notifier).addTherapist(
+                  name: data.name,
+                  email: data.email.isNotEmpty ? data.email : null,
+                  phoneNumber: data.phone.isNotEmpty ? data.phone : null,
+                  specialty: data.specialty.isNotEmpty ? data.specialty : null,
+                );
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Terapeuta creado con éxito.')),
+            );
+          } else {
+            ref.read(therapistsControllerProvider.notifier).updateTherapist(
+                  therapist.id,
+                  name: data.name,
+                  email: data.email.isNotEmpty ? data.email : null,
+                  phoneNumber: data.phone.isNotEmpty ? data.phone : null,
+                  specialty: data.specialty.isNotEmpty ? data.specialty : null,
+                );
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Terapeuta actualizado con éxito.')),
+            );
+          }
         },
       ),
     );

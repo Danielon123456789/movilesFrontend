@@ -11,6 +11,7 @@ class AppScreenHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
     return Container(
@@ -19,7 +20,7 @@ class AppScreenHeader extends StatelessWidget {
         vertical: AppSpacing.md,
       ),
       decoration: BoxDecoration(
-        color: AppColors.chipActiveFg,
+        color: colorScheme.primary,
         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
       ),
       child: Row(
@@ -31,10 +32,10 @@ class AppScreenHeader extends StatelessWidget {
               children: [
                 Text(
                   date,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
-                    color: Color.fromARGB(221, 254, 254, 254),
+                    color: colorScheme.onPrimary.withValues(alpha: 0.88),
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -42,7 +43,7 @@ class AppScreenHeader extends StatelessWidget {
                 Text(
                   title,
                   style: textTheme.headlineMedium?.copyWith(
-                    color: Colors.white,
+                    color: colorScheme.onPrimary,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -65,11 +66,13 @@ class _NotificationButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Stack(
       clipBehavior: Clip.none,
       children: [
         Material(
-          color: Colors.white.withValues(alpha: 0.25),
+          color: colorScheme.onPrimary.withValues(alpha: 0.14),
           shape: const CircleBorder(),
           child: InkWell(
             customBorder: const CircleBorder(),

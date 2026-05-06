@@ -22,6 +22,7 @@ class TherapistCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
     final hasMenu = onMenuEdit != null || onMenuDelete != null;
@@ -38,14 +39,18 @@ class TherapistCard extends StatelessWidget {
         ),
         padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
-          color: AppColors.cardSurface,
+          color: colorScheme.surface,
           borderRadius: BorderRadius.circular(18),
-          border: const Border.fromBorderSide(
-            BorderSide(color: AppColors.subtleBorder),
+          border: Border.fromBorderSide(
+            BorderSide(color: colorScheme.outlineVariant),
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
+              color: Colors.black.withValues(
+                alpha: Theme.of(context).brightness == Brightness.dark
+                    ? 0.22
+                    : 0.06,
+              ),
               blurRadius: 12,
               offset: const Offset(0, 6),
             ),
@@ -65,14 +70,14 @@ class TherapistCard extends StatelessWidget {
                     iconSize: 28,
                     icon: Icon(
                       Icons.more_vert,
-                      color: AppColors.textMuted,
+                      color: colorScheme.onSurfaceVariant,
                       size: 28,
                     ),
                     offset: const Offset(0, 6),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    color: AppColors.cardSurface,
+                    color: colorScheme.surface,
                     elevation: 2,
                     itemBuilder: (context) => [
                       if (onMenuEdit != null)
@@ -124,16 +129,17 @@ class _TherapistIdentity extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Row(
       children: [
         CircleAvatar(
           radius: 24,
-          backgroundColor: AppColors.chipActiveFg,
+          backgroundColor: colorScheme.primary,
           child: Text(
             therapist.initials,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: colorScheme.onPrimary,
               fontSize: 14,
               fontWeight: FontWeight.w700,
             ),
@@ -154,7 +160,7 @@ class _TherapistIdentity extends StatelessWidget {
               Text(
                 therapist.specialty,
                 style: textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textMuted,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -172,16 +178,18 @@ class _EmailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Row(
       children: [
-        Icon(Icons.mail_outline, size: 18, color: AppColors.textMuted),
+        Icon(Icons.mail_outline, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: Text(
             email,
             style: Theme.of(
               context,
-            ).textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
+            ).textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface),
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -198,6 +206,8 @@ class _ScheduleSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -206,14 +216,14 @@ class _ScheduleSection extends StatelessWidget {
             Icon(
               Icons.access_time_outlined,
               size: 18,
-              color: AppColors.textMuted,
+              color: colorScheme.onSurfaceVariant,
             ),
             const SizedBox(width: AppSpacing.sm),
             Text(
               'Horario Laboral',
               style: textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+                  color: colorScheme.onSurface,
               ),
             ),
           ],
@@ -221,7 +231,7 @@ class _ScheduleSection extends StatelessWidget {
         const SizedBox(height: AppSpacing.sm),
         Container(
           decoration: BoxDecoration(
-            border: Border.all(color: AppColors.subtleBorder),
+            border: Border.all(color: colorScheme.outlineVariant),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(
@@ -242,6 +252,7 @@ class _ScheduleSection extends StatelessWidget {
                           schedule[i].day,
                           style: textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w600,
+                            color: colorScheme.onSurface,
                           ),
                         ),
                       ),
@@ -249,7 +260,7 @@ class _ScheduleSection extends StatelessWidget {
                       Text(
                         schedule[i].timeRange,
                         style: textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textMuted,
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],

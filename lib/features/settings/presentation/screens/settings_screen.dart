@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../app/providers/theme_provider.dart';
 import '../../../../app/router/routes.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
@@ -9,9 +10,6 @@ import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../controllers/settings_controller.dart';
 import '../widgets/general_and_treatments_widgets.dart';
 import '../widgets/settings_profile_card.dart';
-
-const _pendingMessage =
-    'Este interruptor cambiará la apariencia de la app a modo oscuro.';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -22,7 +20,7 @@ class SettingsScreen extends ConsumerWidget {
     final notifier = ref.read(settingsControllerProvider.notifier);
 
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -96,12 +94,12 @@ class _SettingsLogoutCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFDDDEE2)),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withValues(alpha: Theme.of(context).brightness == Brightness.dark ? 0.22 : 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -156,7 +154,7 @@ class _Header extends StatelessWidget {
             child: IconButton(
               icon: const Icon(Icons.chevron_left, size: 28),
               onPressed: onBack,
-              color: AppColors.textPrimary,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const Text(
@@ -173,11 +171,13 @@ class _Header extends StatelessWidget {
   }
 }
 
-class _DarkModeSection extends StatelessWidget {
+class _DarkModeSection extends ConsumerWidget {
   const _DarkModeSection();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isDarkMode = ref.watch(themeProvider);
+
     return Row(
       children: [
         const Icon(
@@ -211,11 +211,9 @@ class _DarkModeSection extends StatelessWidget {
           ),
         ),
         Switch(
-          value: false,
+          value: isDarkMode,
           onChanged: (_) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text(_pendingMessage)));
+            ref.read(themeProvider.notifier).toggleTheme();
           },
           activeThumbColor: AppColors.accentBlue,
         ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const Color seed = Color(0xFF6750A4);
+  static const Color seed = Color(0xFF2A9D8F);
 
   // Semantic colors (minimal set).
   static const Color primary = seed;

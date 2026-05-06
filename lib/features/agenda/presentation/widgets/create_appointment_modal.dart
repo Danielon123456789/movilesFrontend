@@ -65,6 +65,7 @@ class _CreateAppointmentModalState extends State<CreateAppointmentModal> {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return SafeArea(
       top: false,
@@ -85,7 +86,7 @@ class _CreateAppointmentModalState extends State<CreateAppointmentModal> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: AppColors.subtleBorder,
+                    color: colorScheme.outlineVariant,
                     borderRadius: BorderRadius.circular(999),
                   ),
                 ),
@@ -95,7 +96,7 @@ class _CreateAppointmentModalState extends State<CreateAppointmentModal> {
                 'Crear cita',
                 style: textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: AppSpacing.md),
@@ -228,6 +229,7 @@ class _ModalDropdownField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -236,7 +238,7 @@ class _ModalDropdownField extends StatelessWidget {
           label,
           style: textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
@@ -271,6 +273,7 @@ class _ModalDateTimeField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -279,7 +282,7 @@ class _ModalDateTimeField extends StatelessWidget {
           'Fecha y hora',
           style: textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
@@ -288,9 +291,9 @@ class _ModalDateTimeField extends StatelessWidget {
           onTap: onTap,
           child: Ink(
             decoration: BoxDecoration(
-              color: AppColors.cardSurface,
+              color: colorScheme.surface,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: AppColors.subtleBorder),
+              border: Border.all(color: colorScheme.outlineVariant),
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(
@@ -303,13 +306,13 @@ class _ModalDateTimeField extends StatelessWidget {
                     child: Text(
                       DateFormat('dd/MM/yyyy - HH:mm', 'es').format(dateTime),
                       style: textTheme.bodyLarge?.copyWith(
-                        color: AppColors.textPrimary,
+                        color: colorScheme.onSurface,
                       ),
                     ),
                   ),
-                  const Icon(
+                  Icon(
                     Icons.event,
-                    color: AppColors.textMuted,
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ],
               ),
@@ -339,6 +342,7 @@ class _ModalInputField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -347,7 +351,7 @@ class _ModalInputField extends StatelessWidget {
           label,
           style: textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
@@ -366,25 +370,27 @@ InputDecoration _modalInputDecoration(
   BuildContext context, {
   String? hintText,
 }) {
+  final colorScheme = Theme.of(context).colorScheme;
+
   return InputDecoration(
     hintText: hintText,
     filled: true,
-    fillColor: AppColors.cardSurface,
+    fillColor: colorScheme.surface,
     contentPadding: const EdgeInsets.symmetric(
       horizontal: AppSpacing.md,
       vertical: 14,
     ),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(14),
-      borderSide: const BorderSide(color: AppColors.subtleBorder),
+        borderSide: BorderSide(color: colorScheme.outlineVariant),
     ),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(14),
-      borderSide: const BorderSide(color: AppColors.subtleBorder),
+        borderSide: BorderSide(color: colorScheme.outlineVariant),
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(14),
-      borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
+        borderSide: BorderSide(color: colorScheme.primary),
     ),
   );
 }

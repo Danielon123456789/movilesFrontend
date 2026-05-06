@@ -18,7 +18,7 @@ class DashboardScreen extends ConsumerWidget {
     final metrics = ref.watch(dashboardMetricsProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.bgCanvas,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -117,11 +117,11 @@ class _PendientesSection extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.cardSurface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
+            color: Colors.black.withValues(alpha: Theme.of(context).brightness == Brightness.dark ? 0.22 : 0.06),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),

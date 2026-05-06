@@ -45,7 +45,7 @@ class PatientsController extends Notifier<PatientsState> {
 
   @override
   PatientsState build() {
-    Future.microtask(_loadInitial);
+    Future.microtask(fetchPatients);
     return const PatientsState(
       patients: [],
       query: '',
@@ -55,7 +55,7 @@ class PatientsController extends Notifier<PatientsState> {
     );
   }
 
-  Future<void> _loadInitial() async {
+  Future<void> fetchPatients() async {
     final repo = ref.read(patientsRepositoryProvider);
     try {
       final list = await repo.fetchPatients();

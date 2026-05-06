@@ -24,6 +24,7 @@ class PatientCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final accent = patient.isActive
         ? AppColors.chipActiveFg
@@ -49,10 +50,10 @@ class PatientCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 22,
-                  backgroundColor: AppColors.bgCanvas,
+                  backgroundColor: colorScheme.surfaceContainerHighest,
                   child: Icon(
                     Icons.person,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.md),
@@ -63,7 +64,7 @@ class PatientCard extends StatelessWidget {
                       Text(
                         patient.daysLabel,
                         style: textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          color: colorScheme.onSurfaceVariant,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -78,7 +79,7 @@ class PatientCard extends StatelessWidget {
                       Text(
                         patient.serviceLabel,
                         style: textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -105,14 +106,18 @@ class PatientCard extends StatelessWidget {
                 AppSpacing.md,
               ),
               decoration: BoxDecoration(
-                color: AppColors.cardSurface,
+                color: colorScheme.surface,
                 borderRadius: BorderRadius.circular(_chromeRadius),
-                border: const Border.fromBorderSide(
-                  BorderSide(color: AppColors.subtleBorder),
+                border: Border.fromBorderSide(
+                  BorderSide(color: colorScheme.outlineVariant),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.06),
+                    color: Colors.black.withValues(
+                      alpha: Theme.of(context).brightness == Brightness.dark
+                          ? 0.22
+                          : 0.06,
+                    ),
                     blurRadius: 12,
                     offset: const Offset(0, 6),
                   ),
