@@ -22,8 +22,8 @@ class AppointmentController {
       data: {
         'patientId': patientId,
         'therapistId': therapistId,
-        'startDate': startDate,
-        'endDate': endDate,
+        'startDate': startDate.toUtc().toIso8601String(),
+        'endDate': endDate.toUtc().toIso8601String(),
         'serviceId': serviceId,
         'notes': notes,
       }..removeWhere((k, v) => v == null),
@@ -47,10 +47,7 @@ class AppointmentController {
   }
 
   Future<List<Appointment>> getByQuery(QueryAppointments query) async {
-    final response = await _dio.get(
-      _prefix,
-      queryParameters: query.toJson(),
-    );
+    final response = await _dio.get(_prefix, queryParameters: query.toJson());
     return (response.data as List)
         .map((json) => Appointment.fromJson(json))
         .toList();

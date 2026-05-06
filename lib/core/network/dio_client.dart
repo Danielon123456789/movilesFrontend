@@ -1,3 +1,4 @@
+import 'package:agenda/features/auth/data/auth_repository.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,8 +23,17 @@ final dioProvider = Provider<Dio>((ref) {
           final firebaseToken = await user.getIdToken();
           options.headers['Authorization'] = 'Bearer $firebaseToken';
         }
-        // No invocar signInWithGoogle() por request: bloqueaba Dio y el backend Nest
-        // no consume X-Google-Access-Token en las rutas actuales.
+        // this header is used in backend for connection with Google Calendar
+        if (user != null &&
+            user.email != null &&
+            user.email!.endsWith('@gmail.com')) {
+          final (_, googleAccessToken) = await ref
+              .read(authRepositoryProvider)
+              .signInWithGoogle();
+          if (googleAccessToken != null) {
+            options.headers['X-Google-Access-Token'] = googleAccessToken;
+          }
+        }
         handler.next(options);
       },
     ),
