@@ -19,7 +19,7 @@ class UserController {
     return User.fromJson(response.data);
   }
 
-  Future<List<User>> getByQuery(String query, String role) async {
+  Future<List<User>> getByQuery({String? query, String? role}) async {
     final response = await _dio.get(
       _prefix,
       queryParameters: {'query': query, 'role': role},

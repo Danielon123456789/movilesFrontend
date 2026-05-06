@@ -33,7 +33,7 @@ class AppBottomNav extends StatelessWidget {
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.account_circle_outlined),
-          label: 'Terapeutas',
+          label: 'Usuarios',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.person_outline),
