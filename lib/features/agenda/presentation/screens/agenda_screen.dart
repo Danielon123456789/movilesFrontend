@@ -74,12 +74,12 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                   setState(() => _isExpanded = !_isExpanded),
                               child: Row(
                                 children: [
-                                  const Text(
+                                  Text(
                                     'Citas',
                                     style: TextStyle(
                                       fontSize: 22,
                                       fontWeight: FontWeight.w700,
-                                      color: AppColors.textPrimary,
+                                      color: Theme.of(context).colorScheme.onSurface,
                                     ),
                                   ),
                                   const SizedBox(width: AppSpacing.xs),
@@ -88,7 +88,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                         ? Icons.keyboard_arrow_down
                                         : Icons.keyboard_arrow_right,
                                     size: 22,
-                                    color: AppColors.textPrimary,
+                                    color: Theme.of(context).colorScheme.onSurface,
                                   ),
                                 ],
                               ),
@@ -119,7 +119,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                                         null) ||
                                                 t == _selectedTherapist
                                             ? AppColors.appointmentAccent
-                                            : AppColors.textPrimary,
+                                            : Theme.of(context).colorScheme.onSurface,
                                       ),
                                     ),
                                   ),
@@ -162,10 +162,10 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                       ),
                     ),
                     const SizedBox(height: AppSpacing.sm),
-                    const Divider(
+                    Divider(
                       height: 1,
                       thickness: 1,
-                      color: AppColors.divider,
+                      color: Theme.of(context).colorScheme.outlineVariant,
                       indent: AppSpacing.md,
                       endIndent: AppSpacing.md,
                     ),

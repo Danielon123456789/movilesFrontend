@@ -9,15 +9,12 @@ class CreatePatientFormData {
     required this.name,
     required this.tutorPhone,
     required this.tutorEmail,
-    required this.service,
     this.active,
   });
 
   final String name;
   final String tutorPhone;
   final String tutorEmail;
-  final String service;
-  /// Solo se establece en modo edición.
   final bool? active;
 }
 
@@ -41,7 +38,6 @@ class _CreatePatientModalState extends State<CreatePatientModal> {
   final _nameController = TextEditingController();
   final _tutorPhoneController = TextEditingController();
   final _tutorEmailController = TextEditingController();
-  final _serviceController = TextEditingController();
 
   late bool _active;
 
@@ -54,7 +50,6 @@ class _CreatePatientModalState extends State<CreatePatientModal> {
     final p = widget.initialPatient;
     if (p != null) {
       _nameController.text = p.name;
-      _serviceController.text = p.serviceLabel;
       _tutorPhoneController.text = p.phoneNumber ?? '';
       _tutorEmailController.text = p.email ?? '';
     }
@@ -65,7 +60,6 @@ class _CreatePatientModalState extends State<CreatePatientModal> {
     _nameController.dispose();
     _tutorPhoneController.dispose();
     _tutorEmailController.dispose();
-    _serviceController.dispose();
     super.dispose();
   }
 
@@ -151,19 +145,6 @@ class _CreatePatientModalState extends State<CreatePatientModal> {
                     return null;
                   },
                 ),
-                const SizedBox(height: AppSpacing.md),
-                _ModalInputField(
-                  label: 'Servicio / terapia necesaria',
-                  hintText: 'Ej. Fisioterapia general',
-                  controller: _serviceController,
-                  textInputAction: TextInputAction.done,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Ingresa el servicio o terapia';
-                    }
-                    return null;
-                  },
-                ),
                 if (_isEditing) ...[
                   const SizedBox(height: AppSpacing.md),
                   Row(
@@ -227,7 +208,6 @@ class _CreatePatientModalState extends State<CreatePatientModal> {
         name: _nameController.text.trim(),
         tutorPhone: _tutorPhoneController.text.trim(),
         tutorEmail: _tutorEmailController.text.trim(),
-        service: _serviceController.text.trim(),
         active: _isEditing ? _active : null,
       ),
     );

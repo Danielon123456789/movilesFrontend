@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 class AppTextStyles {
   static TextTheme textTheme(ColorScheme colorScheme) {
-    final base = Typography.material2021().black;
+    final base = colorScheme.brightness == Brightness.dark
+        ? Typography.material2021().white
+        : Typography.material2021().black;
 
     return base
         .apply(

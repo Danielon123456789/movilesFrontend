@@ -7,25 +7,21 @@ class SettingsState {
   const SettingsState({
     required this.defaultDuration,
     required this.notificationsEnabled,
-    required this.reminderHours,
     required this.treatments,
   });
 
   final int defaultDuration;
   final bool notificationsEnabled;
-  final String reminderHours;
   final List<Service> treatments;
 
   SettingsState copyWith({
     int? defaultDuration,
     bool? notificationsEnabled,
-    String? reminderHours,
     List<Service>? treatments,
   }) {
     return SettingsState(
       defaultDuration: defaultDuration ?? this.defaultDuration,
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
-      reminderHours: reminderHours ?? this.reminderHours,
       treatments: treatments ?? this.treatments,
     );
   }
@@ -37,7 +33,6 @@ class SettingsController extends Notifier<SettingsState> {
     return const SettingsState(
       defaultDuration: 60,
       notificationsEnabled: true,
-      reminderHours: '',
       treatments: [],
     );
   }
@@ -60,10 +55,6 @@ class SettingsController extends Notifier<SettingsState> {
   Future<void> refreshTreatmentsServices() async {
     await fetchTreatments();
     ref.invalidate(servicesListProvider);
-  }
-
-  void setReminderHours(String value) {
-    state = state.copyWith(reminderHours: value);
   }
 
   Future<void> addTreatment(String name, int duration) async {

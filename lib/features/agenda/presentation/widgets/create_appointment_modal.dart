@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import 'package:agenda/core/network/api_exception.dart';
+import 'package:agenda/features/appointments/domain/entities/appointment.dart'
+    as api;
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
@@ -32,7 +34,6 @@ class _CreateAppointmentModalState
   String? _selectedServiceId;
 
   late DateTime _selectedDateTime;
-
   var _submitting = false;
 
   @override
@@ -56,9 +57,7 @@ class _CreateAppointmentModalState
       initialTime: TimeOfDay.fromDateTime(_selectedDateTime),
     );
 
-    if (!mounted || selectedTime == null) {
-      return;
-    }
+    if (!mounted || selectedTime == null) return;
 
     setState(() {
       _selectedDateTime = DateTime(
@@ -124,17 +123,13 @@ class _CreateAppointmentModalState
         );
       }
     } finally {
-      if (mounted) {
-        setState(() => _submitting = false);
-      }
+      if (mounted) setState(() => _submitting = false);
     }
   }
 
   int? _durationForSelected(CreateAppointmentDraftData draft) {
     for (final s in draft.services) {
-      if (s.id == _selectedServiceId) {
-        return s.duration;
-      }
+      if (s.id == _selectedServiceId) return s.duration;
     }
     return null;
   }
@@ -143,7 +138,6 @@ class _CreateAppointmentModalState
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
-
     final draftAsync = ref.watch(createAppointmentDraftDataProvider);
 
     return SafeArea(
@@ -182,8 +176,7 @@ class _CreateAppointmentModalState
               ),
             ],
           ),
-          data: (draft) =>
-              _buildForm(context, draft, textTheme, colorScheme),
+          data: (draft) => _buildForm(context, draft, textTheme, colorScheme),
         ),
       ),
     );
@@ -223,7 +216,7 @@ class _CreateAppointmentModalState
               ),
             ),
             const SizedBox(height: AppSpacing.md),
-            _ModalDropdownField(
+            _SearchableSelectField(
               label: 'Paciente',
               hintText: draft.patients.isEmpty
                   ? 'Sin pacientes disponibles'
@@ -233,11 +226,10 @@ class _CreateAppointmentModalState
                 for (final p in draft.patients) p.id: p.name,
               },
               enabled: draft.patients.isNotEmpty,
-              onChanged: (value) =>
-                  setState(() => _selectedPatientId = value),
+              onChanged: (v) => setState(() => _selectedPatientId = v),
             ),
             const SizedBox(height: AppSpacing.md),
-            _ModalDropdownField(
+            _SearchableSelectField(
               label: 'Terapeuta',
               hintText: draft.therapists.isEmpty
                   ? 'Sin terapeutas disponibles'
@@ -247,11 +239,10 @@ class _CreateAppointmentModalState
                 for (final t in draft.therapists) t.id: t.name,
               },
               enabled: draft.therapists.isNotEmpty,
-              onChanged: (value) =>
-                  setState(() => _selectedTherapistId = value),
+              onChanged: (v) => setState(() => _selectedTherapistId = v),
             ),
             const SizedBox(height: AppSpacing.md),
-            _ModalDropdownField(
+            _SearchableSelectField(
               label: 'Tratamiento',
               hintText: draft.services.isEmpty
                   ? 'Sin tratamientos disponibles'
@@ -261,7 +252,7 @@ class _CreateAppointmentModalState
                 for (final s in draft.services) s.id: s.name,
               },
               enabled: draft.services.isNotEmpty,
-              onChanged: (value) => setState(() => _selectedServiceId = value),
+              onChanged: (v) => setState(() => _selectedServiceId = v),
             ),
             if (_selectedServiceId != null && durationMinutes != null)
               Padding(
@@ -278,6 +269,10 @@ class _CreateAppointmentModalState
             _ModalDateTimeField(
               dateTime: _selectedDateTime,
               onTap: _selectDateTime,
+            ),
+            _DaySchedulePreview(
+              selectedDate: _selectedDateTime,
+              selectedTherapistId: _selectedTherapistId,
             ),
             const SizedBox(height: AppSpacing.lg),
             SizedBox(
@@ -318,8 +313,177 @@ class _CreateAppointmentModalState
   }
 }
 
-class _ModalDropdownField extends StatelessWidget {
-  const _ModalDropdownField({
+// ─────────────────────────────────────────────────────────────────────────────
+// Day schedule preview — shows existing appointments for the selected day
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _DaySchedulePreview extends ConsumerWidget {
+  const _DaySchedulePreview({
+    required this.selectedDate,
+    required this.selectedTherapistId,
+  });
+
+  final DateTime selectedDate;
+  final String? selectedTherapistId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final monthAnchor = DateTime(selectedDate.year, selectedDate.month, 1);
+    final appointmentsAsync = ref.watch(monthAppointmentsProvider(monthAnchor));
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return appointmentsAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
+      data: (appointments) {
+        final dayAppointments = appointments
+            .where((a) {
+              final local = a.startDate.toLocal();
+              return local.year == selectedDate.year &&
+                  local.month == selectedDate.month &&
+                  local.day == selectedDate.day;
+            })
+            .toList()
+          ..sort((a, b) => a.startDate.compareTo(b.startDate));
+
+        if (dayAppointments.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.sm),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.check_circle_outline,
+                  size: 15,
+                  color: AppColors.appointmentAccent,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  'Día disponible — sin citas registradas',
+                  style: textTheme.bodySmall?.copyWith(
+                    color: AppColors.appointmentAccent,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              'Citas ese día',
+              style: textTheme.labelMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Container(
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.5,
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.sm,
+                vertical: AppSpacing.sm,
+              ),
+              child: Column(
+                children: [
+                  for (final appt in dayAppointments)
+                    _ScheduleSlotRow(
+                      appointment: appt,
+                      isTherapistConflict: selectedTherapistId != null &&
+                          appt.therapistId == selectedTherapistId,
+                    ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _ScheduleSlotRow extends StatelessWidget {
+  const _ScheduleSlotRow({
+    required this.appointment,
+    required this.isTherapistConflict,
+  });
+
+  final api.Appointment appointment;
+  final bool isTherapistConflict;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final timeFormat = DateFormat('HH:mm', 'es');
+    final start = timeFormat.format(appointment.startDate.toLocal());
+    final end = timeFormat.format(appointment.endDate.toLocal());
+
+    final accentColor =
+        isTherapistConflict ? AppColors.error : colorScheme.onSurfaceVariant;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Container(
+            width: 3,
+            height: 32,
+            decoration: BoxDecoration(
+              color: accentColor,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$start – $end · ${appointment.patientName}',
+                  style: textTheme.bodySmall?.copyWith(
+                    color: isTherapistConflict
+                        ? AppColors.error
+                        : colorScheme.onSurface,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Text(
+                  appointment.therapistName,
+                  style: textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (isTherapistConflict)
+            const Icon(
+              Icons.warning_amber_rounded,
+              color: AppColors.error,
+              size: 16,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Searchable select field — tapping opens a bottom sheet with search + list
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _SearchableSelectField extends StatelessWidget {
+  const _SearchableSelectField({
     required this.label,
     required this.hintText,
     required this.value,
@@ -335,13 +499,32 @@ class _ModalDropdownField extends StatelessWidget {
   final ValueChanged<String?> onChanged;
   final bool enabled;
 
+  String? get _selectedLabel => value != null ? labelsByValue[value] : null;
+
+  void _openSheet(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => _SelectSearchSheet(
+        title: label,
+        labelsByValue: labelsByValue,
+        selectedValue: value,
+        onSelected: (v) {
+          onChanged(v);
+          Navigator.of(context).pop();
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
-
-    final entries = labelsByValue.entries.toList(growable: false)
-      ..sort((a, b) => a.value.toLowerCase().compareTo(b.value.toLowerCase()));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -355,50 +538,72 @@ class _ModalDropdownField extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.sm),
         FormField<String>(
-          key: ValueKey<String>(
-            '${label}_${value ?? 'null'}_${entries.length}_$enabled',
-          ),
-          initialValue: value != null &&
-                  entries.any((e) => e.key == value) &&
-                  enabled
-              ? value
-              : null,
+          key: ValueKey<String>('${label}_${value ?? 'null'}'),
+          initialValue: value,
           enabled: enabled,
           validator: (v) {
             if (!enabled) return null;
-            if (v == null || v.isEmpty) {
-              return 'Selecciona una opción';
-            }
+            if (v == null || v.isEmpty) return 'Selecciona una opción';
             return null;
           },
           builder: (fieldState) {
-            return InputDecorator(
-              decoration: _modalDropdownDecoration(context).copyWith(
-                errorText: fieldState.errorText,
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  isExpanded: true,
-                  hint: Text(hintText),
-                  value: fieldState.value != null &&
-                          entries.any((e) => e.key == fieldState.value)
-                      ? fieldState.value
-                      : null,
-                  items: [
-                    for (final e in entries)
-                      DropdownMenuItem<String>(
-                        value: e.key,
-                        child: Text(e.value),
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                InkWell(
+                  borderRadius: BorderRadius.circular(14),
+                  onTap: enabled ? () => _openSheet(context) : null,
+                  child: Ink(
+                    decoration: BoxDecoration(
+                      color: colorScheme.surface,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: fieldState.errorText != null
+                            ? colorScheme.error
+                            : colorScheme.outlineVariant,
                       ),
-                  ],
-                  onChanged: enabled
-                      ? (v) {
-                          fieldState.didChange(v);
-                          onChanged(v);
-                        }
-                      : null,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                        vertical: 14,
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              _selectedLabel ?? hintText,
+                              style: textTheme.bodyLarge?.copyWith(
+                                color: _selectedLabel != null
+                                    ? colorScheme.onSurface
+                                    : colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                          Icon(
+                            Icons.search,
+                            color: enabled
+                                ? colorScheme.onSurfaceVariant
+                                : colorScheme.onSurfaceVariant
+                                    .withValues(alpha: 0.4),
+                            size: 20,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+                if (fieldState.errorText != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6, left: 14),
+                    child: Text(
+                      fieldState.errorText!,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: colorScheme.error,
+                      ),
+                    ),
+                  ),
+              ],
             );
           },
         ),
@@ -407,30 +612,185 @@ class _ModalDropdownField extends StatelessWidget {
   }
 }
 
-InputDecoration _modalDropdownDecoration(BuildContext context) {
-  final colorScheme = Theme.of(context).colorScheme;
+class _SelectSearchSheet extends StatefulWidget {
+  const _SelectSearchSheet({
+    required this.title,
+    required this.labelsByValue,
+    required this.selectedValue,
+    required this.onSelected,
+  });
 
-  return InputDecoration(
-    filled: true,
-    fillColor: colorScheme.surface,
-    contentPadding: const EdgeInsets.symmetric(
-      horizontal: AppSpacing.md,
-      vertical: 14,
-    ),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
-      borderSide: BorderSide(color: colorScheme.outlineVariant),
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
-      borderSide: BorderSide(color: colorScheme.outlineVariant),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
-      borderSide: BorderSide(color: colorScheme.primary),
-    ),
-  );
+  final String title;
+  final Map<String, String> labelsByValue;
+  final String? selectedValue;
+  final ValueChanged<String> onSelected;
+
+  @override
+  State<_SelectSearchSheet> createState() => _SelectSearchSheetState();
 }
+
+class _SelectSearchSheetState extends State<_SelectSearchSheet> {
+  final _searchController = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    final sorted = widget.labelsByValue.entries.toList()
+      ..sort((a, b) => a.value.toLowerCase().compareTo(b.value.toLowerCase()));
+
+    final filtered = _query.isEmpty
+        ? sorted
+        : sorted
+            .where((e) =>
+                e.value.toLowerCase().contains(_query.toLowerCase()))
+            .toList();
+
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: AppSpacing.md,
+          right: AppSpacing.md,
+          top: AppSpacing.md,
+          bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.md,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: colorScheme.outlineVariant,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              'Seleccionar ${widget.title.toLowerCase()}',
+              style: textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              controller: _searchController,
+              autofocus: true,
+              onChanged: (v) => setState(() => _query = v),
+              decoration: InputDecoration(
+                hintText: 'Buscar...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _query.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _searchController.clear();
+                          setState(() => _query = '');
+                        },
+                      )
+                    : null,
+                filled: true,
+                fillColor: colorScheme.surfaceContainerHighest
+                    .withValues(alpha: 0.5),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: 12,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(color: colorScheme.outlineVariant),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(color: colorScheme.outlineVariant),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(color: colorScheme.primary),
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.4,
+              ),
+              child: filtered.isEmpty
+                  ? Padding(
+                      padding: const EdgeInsets.all(AppSpacing.md),
+                      child: Center(
+                        child: Text(
+                          'Sin resultados',
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    )
+                  : ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: filtered.length,
+                      itemBuilder: (context, index) {
+                        final entry = filtered[index];
+                        final isSelected = entry.key == widget.selectedValue;
+                        return InkWell(
+                          borderRadius: BorderRadius.circular(10),
+                          onTap: () => widget.onSelected(entry.key),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.sm,
+                              vertical: 12,
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    entry.value,
+                                    style: textTheme.bodyMedium?.copyWith(
+                                      fontWeight: isSelected
+                                          ? FontWeight.w700
+                                          : FontWeight.w400,
+                                      color: isSelected
+                                          ? colorScheme.primary
+                                          : colorScheme.onSurface,
+                                    ),
+                                  ),
+                                ),
+                                if (isSelected)
+                                  Icon(
+                                    Icons.check,
+                                    size: 18,
+                                    color: colorScheme.primary,
+                                  ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Date/time field
+// ─────────────────────────────────────────────────────────────────────────────
 
 class _ModalDateTimeField extends StatelessWidget {
   const _ModalDateTimeField({
@@ -481,10 +841,7 @@ class _ModalDateTimeField extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Icon(
-                    Icons.event,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
+                  Icon(Icons.event, color: colorScheme.onSurfaceVariant),
                 ],
               ),
             ),

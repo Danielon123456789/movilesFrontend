@@ -343,13 +343,32 @@ class _EditDropdownField extends StatelessWidget {
   final ValueChanged<String?> onChanged;
   final bool enabled;
 
+  String? get _selectedLabel => value != null ? labelsByValue[value] : null;
+
+  void _openSheet(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => _EditSelectSearchSheet(
+        title: label,
+        labelsByValue: labelsByValue,
+        selectedValue: value,
+        onSelected: (v) {
+          onChanged(v);
+          Navigator.of(context).pop();
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
-
-    final entries = labelsByValue.entries.toList(growable: false)
-      ..sort((a, b) => a.value.toLowerCase().compareTo(b.value.toLowerCase()));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -363,14 +382,8 @@ class _EditDropdownField extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.sm),
         FormField<String>(
-          key: ValueKey<String>(
-            '${label}_${value ?? 'null'}_${entries.length}_$enabled',
-          ),
-          initialValue: value != null &&
-                  entries.any((e) => e.key == value) &&
-                  enabled
-              ? value
-              : null,
+          key: ValueKey<String>('${label}_${value ?? 'null'}'),
+          initialValue: value,
           enabled: enabled,
           validator: (v) {
             if (!enabled) return null;
@@ -378,33 +391,63 @@ class _EditDropdownField extends StatelessWidget {
             return null;
           },
           builder: (fieldState) {
-            return InputDecorator(
-              decoration: _editDropdownDecoration(context).copyWith(
-                errorText: fieldState.errorText,
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  isExpanded: true,
-                  hint: Text(hintText),
-                  value: fieldState.value != null &&
-                          entries.any((e) => e.key == fieldState.value)
-                      ? fieldState.value
-                      : null,
-                  items: [
-                    for (final e in entries)
-                      DropdownMenuItem<String>(
-                        value: e.key,
-                        child: Text(e.value),
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                InkWell(
+                  borderRadius: BorderRadius.circular(14),
+                  onTap: enabled ? () => _openSheet(context) : null,
+                  child: Ink(
+                    decoration: BoxDecoration(
+                      color: colorScheme.surface,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: fieldState.errorText != null
+                            ? colorScheme.error
+                            : colorScheme.outlineVariant,
                       ),
-                  ],
-                  onChanged: enabled
-                      ? (v) {
-                          fieldState.didChange(v);
-                          onChanged(v);
-                        }
-                      : null,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                        vertical: 14,
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              _selectedLabel ?? hintText,
+                              style: textTheme.bodyLarge?.copyWith(
+                                color: _selectedLabel != null
+                                    ? colorScheme.onSurface
+                                    : colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                          Icon(
+                            Icons.search,
+                            color: enabled
+                                ? colorScheme.onSurfaceVariant
+                                : colorScheme.onSurfaceVariant
+                                    .withValues(alpha: 0.4),
+                            size: 20,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+                if (fieldState.errorText != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6, left: 14),
+                    child: Text(
+                      fieldState.errorText!,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: colorScheme.error,
+                      ),
+                    ),
+                  ),
+              ],
             );
           },
         ),
@@ -413,29 +456,180 @@ class _EditDropdownField extends StatelessWidget {
   }
 }
 
-InputDecoration _editDropdownDecoration(BuildContext context) {
-  final colorScheme = Theme.of(context).colorScheme;
+class _EditSelectSearchSheet extends StatefulWidget {
+  const _EditSelectSearchSheet({
+    required this.title,
+    required this.labelsByValue,
+    required this.selectedValue,
+    required this.onSelected,
+  });
 
-  return InputDecoration(
-    filled: true,
-    fillColor: colorScheme.surface,
-    contentPadding: const EdgeInsets.symmetric(
-      horizontal: AppSpacing.md,
-      vertical: 14,
-    ),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
-      borderSide: BorderSide(color: colorScheme.outlineVariant),
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
-      borderSide: BorderSide(color: colorScheme.outlineVariant),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
-      borderSide: BorderSide(color: colorScheme.primary),
-    ),
-  );
+  final String title;
+  final Map<String, String> labelsByValue;
+  final String? selectedValue;
+  final ValueChanged<String> onSelected;
+
+  @override
+  State<_EditSelectSearchSheet> createState() => _EditSelectSearchSheetState();
+}
+
+class _EditSelectSearchSheetState extends State<_EditSelectSearchSheet> {
+  final _searchController = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    final sorted = widget.labelsByValue.entries.toList()
+      ..sort((a, b) => a.value.toLowerCase().compareTo(b.value.toLowerCase()));
+
+    final filtered = _query.isEmpty
+        ? sorted
+        : sorted
+            .where((e) =>
+                e.value.toLowerCase().contains(_query.toLowerCase()))
+            .toList();
+
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: AppSpacing.md,
+          right: AppSpacing.md,
+          top: AppSpacing.md,
+          bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.md,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: colorScheme.outlineVariant,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              'Seleccionar ${widget.title.toLowerCase()}',
+              style: textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              controller: _searchController,
+              autofocus: true,
+              onChanged: (v) => setState(() => _query = v),
+              decoration: InputDecoration(
+                hintText: 'Buscar...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _query.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _searchController.clear();
+                          setState(() => _query = '');
+                        },
+                      )
+                    : null,
+                filled: true,
+                fillColor: colorScheme.surfaceContainerHighest
+                    .withValues(alpha: 0.5),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: 12,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(color: colorScheme.outlineVariant),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(color: colorScheme.outlineVariant),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(color: colorScheme.primary),
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.4,
+              ),
+              child: filtered.isEmpty
+                  ? Padding(
+                      padding: const EdgeInsets.all(AppSpacing.md),
+                      child: Center(
+                        child: Text(
+                          'Sin resultados',
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    )
+                  : ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: filtered.length,
+                      itemBuilder: (context, index) {
+                        final entry = filtered[index];
+                        final isSelected = entry.key == widget.selectedValue;
+                        return InkWell(
+                          borderRadius: BorderRadius.circular(10),
+                          onTap: () => widget.onSelected(entry.key),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.sm,
+                              vertical: 12,
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    entry.value,
+                                    style: textTheme.bodyMedium?.copyWith(
+                                      fontWeight: isSelected
+                                          ? FontWeight.w700
+                                          : FontWeight.w400,
+                                      color: isSelected
+                                          ? colorScheme.primary
+                                          : colorScheme.onSurface,
+                                    ),
+                                  ),
+                                ),
+                                if (isSelected)
+                                  Icon(
+                                    Icons.check,
+                                    size: 18,
+                                    color: colorScheme.primary,
+                                  ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _EditDateTimeField extends StatelessWidget {

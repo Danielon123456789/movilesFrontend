@@ -29,10 +29,10 @@ class SettingsSectionTitle extends StatelessWidget {
         const SizedBox(width: AppSpacing.sm),
         Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: colorScheme.onSurface,
           ),
         ),
       ],
@@ -61,12 +61,12 @@ class GeneralDurationSection extends StatelessWidget {
           title: 'General',
         ),
         const SizedBox(height: AppSpacing.md),
-        const Text(
+        Text(
           'Duración predeterminada (min)',
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w400,
-            color: AppColors.textMuted,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
@@ -98,19 +98,19 @@ class TreatmentsManagementSection extends StatelessWidget {
       children: [
         Row(
           children: [
-            const Icon(
+            Icon(
               Icons.medical_services_outlined,
               size: 22,
-              color: AppColors.textPrimary,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
             const SizedBox(width: AppSpacing.sm),
-            const Expanded(
+            Expanded(
               child: Text(
                 'Tratamientos',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ),
@@ -172,19 +172,19 @@ class _TreatmentExpansionTile extends StatelessWidget {
                 children: [
                   Text(
                     service.name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     '${service.duration} min',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w400,
-                      color: AppColors.textMuted,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -220,7 +220,7 @@ class _TreatmentExpansionTile extends StatelessWidget {
     required VoidCallback onTap,
     Color? color,
   }) {
-    final optionColor = color ?? AppColors.textPrimary;
+    final optionColor = color ?? Theme.of(context).colorScheme.onSurface;
     return InkWell(
       onTap: onTap,
       child: Padding(

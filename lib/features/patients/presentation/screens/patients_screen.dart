@@ -268,7 +268,7 @@ class PatientsScreen extends ConsumerWidget {
     if (editingPatient == null) {
       await notifier.addPatient(
         name: data.name,
-        serviceLabel: data.service,
+        serviceLabel: '',
         email: data.tutorEmail,
         phoneNumber: data.tutorPhone,
       );
@@ -278,7 +278,7 @@ class PatientsScreen extends ConsumerWidget {
         name: data.name,
         email: data.tutorEmail,
         phoneNumber: data.tutorPhone,
-        serviceLabel: data.service,
+        serviceLabel: '',
         active: data.active,
       );
     }

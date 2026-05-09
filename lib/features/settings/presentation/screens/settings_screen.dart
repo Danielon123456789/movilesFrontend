@@ -47,8 +47,6 @@ class SettingsScreen extends ConsumerWidget {
                     _NotificationsSection(
                       enabled: state.notificationsEnabled,
                       onToggle: notifier.toggleNotifications,
-                      reminderHours: state.reminderHours,
-                      onReminderChanged: notifier.setReminderHours,
                     ),
                     const Divider(
                       height: AppSpacing.xl * 2,
@@ -157,12 +155,12 @@ class _Header extends StatelessWidget {
               color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
-          const Text(
+          Text(
             'Configuración',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ],
@@ -178,15 +176,17 @@ class _DarkModeSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isDarkMode = ref.watch(themeProvider);
 
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Row(
       children: [
-        const Icon(
+        Icon(
           Icons.dark_mode_outlined,
           size: 22,
-          color: AppColors.textPrimary,
+          color: colorScheme.onSurface,
         ),
         const SizedBox(width: AppSpacing.sm),
-        const Expanded(
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -195,16 +195,16 @@ class _DarkModeSection extends ConsumerWidget {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: colorScheme.onSurface,
                 ),
               ),
-              SizedBox(height: 2),
+              const SizedBox(height: 2),
               Text(
                 'Cambiar apariencia de la app',
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w400,
-                  color: AppColors.textMuted,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -226,17 +226,15 @@ class _NotificationsSection extends StatelessWidget {
   const _NotificationsSection({
     required this.enabled,
     required this.onToggle,
-    required this.reminderHours,
-    required this.onReminderChanged,
   });
 
   final bool enabled;
   final ValueChanged<bool> onToggle;
-  final String reminderHours;
-  final ValueChanged<String> onReminderChanged;
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -251,12 +249,12 @@ class _NotificationsSection extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Habilitar notificaciones',
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -265,7 +263,7 @@ class _NotificationsSection extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w400,
-                      color: AppColors.textMuted,
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -277,21 +275,6 @@ class _NotificationsSection extends StatelessWidget {
               activeThumbColor: AppColors.accentBlue,
             ),
           ],
-        ),
-        const SizedBox(height: AppSpacing.md),
-        const Text(
-          'Recordar antes de (horas)',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
-            color: AppColors.textMuted,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        SettingsOutlinedTextField(
-          initialValue: reminderHours,
-          onChanged: onReminderChanged,
-          keyboardType: TextInputType.number,
         ),
       ],
     );
