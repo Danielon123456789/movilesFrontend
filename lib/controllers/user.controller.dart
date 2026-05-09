@@ -22,7 +22,8 @@ class UserController {
   Future<List<User>> getByQuery({String? query, String? role}) async {
     final response = await _dio.get(
       _prefix,
-      queryParameters: {'query': query, 'role': role},
+      queryParameters: {'query': query, 'role': role}
+        ..removeWhere((k, v) => v == null),
     );
     return (response.data as List).map((json) => User.fromJson(json)).toList();
   }
