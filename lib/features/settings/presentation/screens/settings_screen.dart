@@ -44,14 +44,6 @@ class SettingsScreen extends ConsumerWidget {
                       height: AppSpacing.xl * 2,
                       color: AppColors.divider,
                     ),
-                    _NotificationsSection(
-                      enabled: state.notificationsEnabled,
-                      onToggle: notifier.toggleNotifications,
-                    ),
-                    const Divider(
-                      height: AppSpacing.xl * 2,
-                      color: AppColors.divider,
-                    ),
                     _SettingsLogoutCard(
                       onTap: () => _handleLogout(context, ref),
                     ),
@@ -97,7 +89,11 @@ class _SettingsLogoutCard extends StatelessWidget {
         border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: Theme.of(context).brightness == Brightness.dark ? 0.22 : 0.05),
+            color: Colors.black.withValues(
+              alpha: Theme.of(context).brightness == Brightness.dark
+                  ? 0.22
+                  : 0.05,
+            ),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -109,7 +105,10 @@ class _SettingsLogoutCard extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           child: const Padding(
-            padding: EdgeInsets.symmetric(vertical: 12, horizontal: AppSpacing.md),
+            padding: EdgeInsets.symmetric(
+              vertical: 12,
+              horizontal: AppSpacing.md,
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -180,11 +179,7 @@ class _DarkModeSection extends ConsumerWidget {
 
     return Row(
       children: [
-        Icon(
-          Icons.dark_mode_outlined,
-          size: 22,
-          color: colorScheme.onSurface,
-        ),
+        Icon(Icons.dark_mode_outlined, size: 22, color: colorScheme.onSurface),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: Column(
@@ -223,10 +218,7 @@ class _DarkModeSection extends ConsumerWidget {
 }
 
 class _NotificationsSection extends StatelessWidget {
-  const _NotificationsSection({
-    required this.enabled,
-    required this.onToggle,
-  });
+  const _NotificationsSection({required this.enabled, required this.onToggle});
 
   final bool enabled;
   final ValueChanged<bool> onToggle;

@@ -1,4 +1,6 @@
+import 'package:agenda/app/theme/app_colors.dart';
 import 'package:agenda/controllers/user.controller.dart';
+import 'package:agenda/features/therapists/presentation/widgets/set_role_modal.dart';
 import 'package:agenda/models/user.model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -127,11 +129,38 @@ class TherapistsScreen extends ConsumerWidget {
       //     child: const Icon(Icons.add, color: Colors.white),
       //   ),
       // ),
+      // floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      // bottomNavigationBar: AppBottomNav(
+      //   currentIndex: 2,
+      //   onTap: (index) => _onNavTap(context, index),
+      // ),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: FloatingActionButton(
+          onPressed: () => showSetRoleModal(context),
+          backgroundColor: AppColors.accentBlue,
+          elevation: 4,
+          shape: const CircleBorder(),
+          child: const Icon(Icons.person, color: Colors.white),
+        ),
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: AppBottomNav(
         currentIndex: 2,
         onTap: (index) => _onNavTap(context, index),
       ),
+    );
+  }
+
+  static Future<void> showSetRoleModal(BuildContext context) {
+    return showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => const SetRoleModal(),
     );
   }
 

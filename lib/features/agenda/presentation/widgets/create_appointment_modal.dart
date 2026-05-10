@@ -1,3 +1,4 @@
+import 'package:agenda/features/notifications/notifications_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -13,10 +14,7 @@ import '../controllers/agenda_controller.dart';
 import '../providers/create_appointment_providers.dart';
 
 class CreateAppointmentModal extends ConsumerStatefulWidget {
-  const CreateAppointmentModal({
-    super.key,
-    required this.initialDate,
-  });
+  const CreateAppointmentModal({super.key, required this.initialDate});
 
   final DateTime initialDate;
 
@@ -100,7 +98,9 @@ class _CreateAppointmentModalState
     setState(() => _submitting = true);
 
     try {
-      await ref.read(appointmentsRepositoryProvider).createAppointment(
+      await ref
+          .read(appointmentsRepositoryProvider)
+          .createAppointment(
             patientId: _selectedPatientId!,
             therapistId: _selectedTherapistId!,
             serviceId: _selectedServiceId!,
@@ -116,11 +116,18 @@ class _CreateAppointmentModalState
         const SnackBar(content: Text('Cita creada correctamente.')),
       );
       Navigator.of(context).pop();
+      ref
+          .read(notificationProvider.notifier)
+          .addItem(
+            title: 'Nueva cita',
+            description:
+                'Cita agendada para ${DateFormat('dd/MM/yyyy').format(start)}',
+          );
     } on ApiException catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.message)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.message)));
       }
     } finally {
       if (mounted) setState(() => _submitting = false);
@@ -222,9 +229,7 @@ class _CreateAppointmentModalState
                   ? 'Sin pacientes disponibles'
                   : 'Selecciona un paciente',
               value: _selectedPatientId,
-              labelsByValue: {
-                for (final p in draft.patients) p.id: p.name,
-              },
+              labelsByValue: {for (final p in draft.patients) p.id: p.name},
               enabled: draft.patients.isNotEmpty,
               onChanged: (v) => setState(() => _selectedPatientId = v),
             ),
@@ -235,9 +240,7 @@ class _CreateAppointmentModalState
                   ? 'Sin terapeutas disponibles'
                   : 'Selecciona un terapeuta',
               value: _selectedTherapistId,
-              labelsByValue: {
-                for (final t in draft.therapists) t.id: t.name,
-              },
+              labelsByValue: {for (final t in draft.therapists) t.id: t.name},
               enabled: draft.therapists.isNotEmpty,
               onChanged: (v) => setState(() => _selectedTherapistId = v),
             ),
@@ -248,9 +251,7 @@ class _CreateAppointmentModalState
                   ? 'Sin tratamientos disponibles'
                   : 'Selecciona un tratamiento',
               value: _selectedServiceId,
-              labelsByValue: {
-                for (final s in draft.services) s.id: s.name,
-              },
+              labelsByValue: {for (final s in draft.services) s.id: s.name},
               enabled: draft.services.isNotEmpty,
               onChanged: (v) => setState(() => _selectedServiceId = v),
             ),
@@ -279,7 +280,8 @@ class _CreateAppointmentModalState
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: _submitting ||
+                onPressed:
+                    _submitting ||
                         draft.patients.isEmpty ||
                         draft.therapists.isEmpty ||
                         draft.services.isEmpty
@@ -337,15 +339,12 @@ class _DaySchedulePreview extends ConsumerWidget {
       loading: () => const SizedBox.shrink(),
       error: (_, _) => const SizedBox.shrink(),
       data: (appointments) {
-        final dayAppointments = appointments
-            .where((a) {
-              final local = a.startDate.toLocal();
-              return local.year == selectedDate.year &&
-                  local.month == selectedDate.month &&
-                  local.day == selectedDate.day;
-            })
-            .toList()
-          ..sort((a, b) => a.startDate.compareTo(b.startDate));
+        final dayAppointments = appointments.where((a) {
+          final local = a.startDate.toLocal();
+          return local.year == selectedDate.year &&
+              local.month == selectedDate.month &&
+              local.day == selectedDate.day;
+        }).toList()..sort((a, b) => a.startDate.compareTo(b.startDate));
 
         if (dayAppointments.isEmpty) {
           return Padding(
@@ -397,7 +396,8 @@ class _DaySchedulePreview extends ConsumerWidget {
                   for (final appt in dayAppointments)
                     _ScheduleSlotRow(
                       appointment: appt,
-                      isTherapistConflict: selectedTherapistId != null &&
+                      isTherapistConflict:
+                          selectedTherapistId != null &&
                           appt.therapistId == selectedTherapistId,
                     ),
                 ],
@@ -427,8 +427,9 @@ class _ScheduleSlotRow extends StatelessWidget {
     final start = timeFormat.format(appointment.startDate.toLocal());
     final end = timeFormat.format(appointment.endDate.toLocal());
 
-    final accentColor =
-        isTherapistConflict ? AppColors.error : colorScheme.onSurfaceVariant;
+    final accentColor = isTherapistConflict
+        ? AppColors.error
+        : colorScheme.onSurfaceVariant;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
@@ -584,8 +585,9 @@ class _SearchableSelectField extends StatelessWidget {
                             Icons.search,
                             color: enabled
                                 ? colorScheme.onSurfaceVariant
-                                : colorScheme.onSurfaceVariant
-                                    .withValues(alpha: 0.4),
+                                : colorScheme.onSurfaceVariant.withValues(
+                                    alpha: 0.4,
+                                  ),
                             size: 20,
                           ),
                         ],
@@ -650,9 +652,10 @@ class _SelectSearchSheetState extends State<_SelectSearchSheet> {
     final filtered = _query.isEmpty
         ? sorted
         : sorted
-            .where((e) =>
-                e.value.toLowerCase().contains(_query.toLowerCase()))
-            .toList();
+              .where(
+                (e) => e.value.toLowerCase().contains(_query.toLowerCase()),
+              )
+              .toList();
 
     return SafeArea(
       top: false,
@@ -702,8 +705,9 @@ class _SelectSearchSheetState extends State<_SelectSearchSheet> {
                       )
                     : null,
                 filled: true,
-                fillColor: colorScheme.surfaceContainerHighest
-                    .withValues(alpha: 0.5),
+                fillColor: colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.5,
+                ),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.md,
                   vertical: 12,
@@ -793,10 +797,7 @@ class _SelectSearchSheetState extends State<_SelectSearchSheet> {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _ModalDateTimeField extends StatelessWidget {
-  const _ModalDateTimeField({
-    required this.dateTime,
-    required this.onTap,
-  });
+  const _ModalDateTimeField({required this.dateTime, required this.onTap});
 
   final DateTime dateTime;
   final VoidCallback onTap;

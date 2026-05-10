@@ -1,3 +1,5 @@
+import 'package:agenda/features/notifications/notifications_screen.dart';
+import 'package:agenda/features/therapists/presentation/widgets/set_role_modal.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/agenda/domain/entities/appointment.dart';
@@ -76,6 +78,10 @@ final GoRouter appRouter = GoRouter(
           builder: (context, state) => const SettingsScreen(),
         ),
       ],
+    ),
+    GoRoute(
+      path: Routes.notifications,
+      builder: (context, state) => const NotificationsScreen(),
     ),
   ],
 );

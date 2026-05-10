@@ -31,13 +31,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
   bool _isExpanded = true;
   String? _selectedTherapist;
 
-  static const _therapists = [
-    'Todos',
-    'Daniel Hernández',
-    'Sergio Gómez',
-    'Roberto Gómez',
-    'Carlos Rodríguez',
-  ];
+  List<String> _therapists = ['Todos'];
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +73,9 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                     style: TextStyle(
                                       fontSize: 22,
                                       fontWeight: FontWeight.w700,
-                                      color: Theme.of(context).colorScheme.onSurface,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurface,
                                     ),
                                   ),
                                   const SizedBox(width: AppSpacing.xs),
@@ -88,7 +84,9 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                         ? Icons.keyboard_arrow_down
                                         : Icons.keyboard_arrow_right,
                                     size: 22,
-                                    color: Theme.of(context).colorScheme.onSurface,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurface,
                                   ),
                                 ],
                               ),
@@ -119,7 +117,9 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                                         null) ||
                                                 t == _selectedTherapist
                                             ? AppColors.appointmentAccent
-                                            : Theme.of(context).colorScheme.onSurface,
+                                            : Theme.of(
+                                                context,
+                                              ).colorScheme.onSurface,
                                       ),
                                     ),
                                   ),
@@ -198,6 +198,10 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                           ),
                         ],
                         data: (allVms) {
+                          _therapists = ['Todos'];
+                          _therapists.addAll(
+                            allVms.map((appointment) => appointment.therapist),
+                          );
                           final appointments = _selectedTherapist == null
                               ? allVms
                               : allVms

@@ -54,8 +54,6 @@ class DashboardScreen extends ConsumerWidget {
                     iconBgColor: AppColors.accentBlue.withValues(alpha: 0.15),
                   ),
                   const SizedBox(height: AppSpacing.md),
-                  const _PendientesSection(),
-                  const SizedBox(height: AppSpacing.md),
                 ],
               ),
             ),
