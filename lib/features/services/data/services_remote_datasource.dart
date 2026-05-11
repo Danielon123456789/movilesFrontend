@@ -34,4 +34,23 @@ class ServicesRemoteDataSource {
       Map<String, dynamic>.from(response.data as Map),
     );
   }
+
+  Future<ServiceModel> updateService(
+    int id, {
+    String? name,
+    int? duration,
+  }) async {
+    final data = <String, dynamic>{
+      'name': name,
+      'duration': duration,
+    }..removeWhere((_, v) => v == null);
+    final response = await _dio.patch('$_base/$id', data: data);
+    return ServiceModel.fromJson(
+      Map<String, dynamic>.from(response.data as Map),
+    );
+  }
+
+  Future<void> deleteService(int id) async {
+    await _dio.delete('$_base/$id');
+  }
 }

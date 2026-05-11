@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:agenda/core/network/api_exception.dart';
+import 'package:agenda/features/services/domain/entities/service.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../controllers/settings_controller.dart';
 import '../widgets/create_treatment_modal.dart';
+import '../widgets/edit_treatment_modal.dart';
 import '../widgets/general_and_treatments_widgets.dart';
 
 /// Pantalla dedicada a General (duración) y lista de tratamientos.
@@ -103,6 +105,10 @@ class _TreatmentsScreenState extends ConsumerState<TreatmentsScreen> {
                         TreatmentsManagementSection(
                           services: state.treatments,
                           onAdd: () => _openCreateTreatment(context, notifier),
+                          onEdit: (s) =>
+                              _openEditTreatment(context, notifier, s),
+                          onDelete: (s) =>
+                              _confirmDeleteTreatment(context, notifier, s),
                         ),
                     ],
                   ),
@@ -141,6 +147,91 @@ class _TreatmentsScreenState extends ConsumerState<TreatmentsScreen> {
         },
       ),
     );
+  }
+
+  Future<void> _openEditTreatment(
+    BuildContext context,
+    SettingsController notifier,
+    Service service,
+  ) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.cardSurface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetContext) => EditTreatmentModal(
+        initialName: service.name,
+        initialDuration: service.duration,
+        onSubmit: (name, duration) async {
+          try {
+            await notifier.editTreatment(
+              service.id,
+              name: name,
+              duration: duration,
+            );
+            if (!context.mounted) return;
+            Navigator.of(sheetContext).pop();
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Tratamiento actualizado')),
+            );
+          } on ApiException catch (e) {
+            if (!context.mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(e.message)),
+            );
+          }
+        },
+      ),
+    );
+  }
+
+  Future<void> _confirmDeleteTreatment(
+    BuildContext context,
+    SettingsController notifier,
+    Service service,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Eliminar tratamiento'),
+        content: Text(
+          '¿Eliminar "${service.name}"? Esta acción no se puede deshacer.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.error,
+            ),
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    try {
+      await notifier.removeTreatment(service.id);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Tratamiento eliminado')),
+      );
+    } on ApiException catch (e) {
+      if (!context.mounted) return;
+      final msg = e.message.contains('existing appointments')
+          ? 'No se puede eliminar: este tratamiento tiene citas asociadas'
+          : e.message;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(msg)),
+      );
+    }
   }
 }
 

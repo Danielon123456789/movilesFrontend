@@ -7,4 +7,8 @@ abstract class ServicesRepository {
     required String name,
     required int duration,
   });
+
+  Future<Service> updateService(String id, {String? name, int? duration});
+
+  Future<void> deleteService(String id);
 }

@@ -3,15 +3,19 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 
+typedef EditTreatmentSubmit = Future<void> Function(String name, int duration);
+
 class EditTreatmentModal extends StatefulWidget {
   const EditTreatmentModal({
     super.key,
     required this.initialName,
+    required this.initialDuration,
     required this.onSubmit,
   });
 
   final String initialName;
-  final ValueChanged<String> onSubmit;
+  final int initialDuration;
+  final EditTreatmentSubmit onSubmit;
 
   @override
   State<EditTreatmentModal> createState() => _EditTreatmentModalState();
@@ -20,21 +24,27 @@ class EditTreatmentModal extends StatefulWidget {
 class _EditTreatmentModalState extends State<EditTreatmentModal> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameController;
+  late final TextEditingController _durationController;
+  var _submitting = false;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.initialName);
+    _durationController =
+        TextEditingController(text: '${widget.initialDuration}');
   }
 
   @override
   void dispose() {
     _nameController.dispose();
+    _durationController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
     return SafeArea(
@@ -58,7 +68,7 @@ class _EditTreatmentModalState extends State<EditTreatmentModal> {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: AppColors.subtleBorder,
+                      color: colorScheme.outlineVariant,
                       borderRadius: BorderRadius.circular(999),
                     ),
                   ),
@@ -68,13 +78,13 @@ class _EditTreatmentModalState extends State<EditTreatmentModal> {
                   'Editar tratamiento',
                   style: textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.md),
                 TextFormField(
                   controller: _nameController,
-                  textInputAction: TextInputAction.done,
+                  textInputAction: TextInputAction.next,
                   decoration: const InputDecoration(
                     labelText: 'Nombre del tratamiento',
                     hintText: 'Ej. Fisioterapia General',
@@ -86,12 +96,32 @@ class _EditTreatmentModalState extends State<EditTreatmentModal> {
                     return null;
                   },
                 ),
+                const SizedBox(height: AppSpacing.md),
+                TextFormField(
+                  controller: _durationController,
+                  keyboardType: TextInputType.number,
+                  textInputAction: TextInputAction.done,
+                  decoration: const InputDecoration(
+                    labelText: 'Duración (minutos)',
+                    hintText: 'Ej. 60',
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Ingresa la duración en minutos';
+                    }
+                    final n = int.tryParse(value.trim());
+                    if (n == null || n < 1) {
+                      return 'Debe ser un entero mayor que 0';
+                    }
+                    return null;
+                  },
+                ),
                 const SizedBox(height: AppSpacing.lg),
                 SizedBox(
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: _submit,
+                    onPressed: _submitting ? null : _submit,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.accentBlue,
                       foregroundColor: Colors.white,
@@ -104,7 +134,13 @@ class _EditTreatmentModalState extends State<EditTreatmentModal> {
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    child: const Text('Guardar cambios'),
+                    child: _submitting
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('Guardar cambios'),
                   ),
                 ),
               ],
@@ -115,10 +151,15 @@ class _EditTreatmentModalState extends State<EditTreatmentModal> {
     );
   }
 
-  void _submit() {
-    if (!_formKey.currentState!.validate()) {
-      return;
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+    final name = _nameController.text.trim();
+    final duration = int.parse(_durationController.text.trim());
+    setState(() => _submitting = true);
+    try {
+      await widget.onSubmit(name, duration);
+    } finally {
+      if (mounted) setState(() => _submitting = false);
     }
-    widget.onSubmit(_nameController.text.trim());
   }
 }

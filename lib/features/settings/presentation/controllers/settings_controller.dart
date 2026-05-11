@@ -63,6 +63,29 @@ class SettingsController extends Notifier<SettingsState> {
     ref.invalidate(servicesListProvider);
     state = state.copyWith(treatments: [...state.treatments, created]);
   }
+
+  Future<void> editTreatment(
+    String id, {
+    String? name,
+    int? duration,
+  }) async {
+    final repo = ref.read(servicesRepositoryProvider);
+    final updated = await repo.updateService(id, name: name, duration: duration);
+    final idx = state.treatments.indexWhere((t) => t.id == id);
+    if (idx < 0) return;
+    final next = List<Service>.from(state.treatments)..[idx] = updated;
+    state = state.copyWith(treatments: next);
+    ref.invalidate(servicesListProvider);
+  }
+
+  Future<void> removeTreatment(String id) async {
+    final repo = ref.read(servicesRepositoryProvider);
+    await repo.deleteService(id);
+    state = state.copyWith(
+      treatments: state.treatments.where((t) => t.id != id).toList(),
+    );
+    ref.invalidate(servicesListProvider);
+  }
 }
 
 final settingsControllerProvider =

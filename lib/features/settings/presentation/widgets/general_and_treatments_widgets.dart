@@ -86,10 +86,14 @@ class TreatmentsManagementSection extends StatelessWidget {
     super.key,
     required this.services,
     required this.onAdd,
+    required this.onEdit,
+    required this.onDelete,
   });
 
   final List<Service> services;
   final VoidCallback onAdd;
+  final void Function(Service) onEdit;
+  final void Function(Service) onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -123,7 +127,11 @@ class TreatmentsManagementSection extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.md),
         for (final service in services) ...[
-          _TreatmentExpansionTile(service: service),
+          _TreatmentExpansionTile(
+            service: service,
+            onEdit: onEdit,
+            onDelete: onDelete,
+          ),
           const SizedBox(height: AppSpacing.sm),
         ],
       ],
@@ -132,19 +140,15 @@ class TreatmentsManagementSection extends StatelessWidget {
 }
 
 class _TreatmentExpansionTile extends StatelessWidget {
-  const _TreatmentExpansionTile({required this.service});
+  const _TreatmentExpansionTile({
+    required this.service,
+    required this.onEdit,
+    required this.onDelete,
+  });
 
   final Service service;
-
-  void _showServerPending(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Esta acción estará disponible cuando exista soporte en el servidor.',
-        ),
-      ),
-    );
-  }
+  final void Function(Service) onEdit;
+  final void Function(Service) onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -198,7 +202,7 @@ class _TreatmentExpansionTile extends StatelessWidget {
             context,
             icon: Icons.edit_outlined,
             text: 'Editar',
-            onTap: () => _showServerPending(context),
+            onTap: () => onEdit(service),
           ),
           Divider(height: 1, color: colorScheme.outlineVariant),
           _tileOption(
@@ -206,7 +210,7 @@ class _TreatmentExpansionTile extends StatelessWidget {
             icon: Icons.delete_outline,
             text: 'Eliminar',
             color: AppColors.error,
-            onTap: () => _showServerPending(context),
+            onTap: () => onDelete(service),
           ),
         ],
       ),

@@ -44,4 +44,27 @@ class ServicesRepositoryImpl implements ServicesRepository {
       throw ApiException(dioExceptionToMessage(e));
     }
   }
+
+  @override
+  Future<Service> updateService(String id, {String? name, int? duration}) async {
+    try {
+      final model = await _remote.updateService(
+        int.parse(id),
+        name: name,
+        duration: duration,
+      );
+      return _toEntity(model);
+    } on DioException catch (e) {
+      throw ApiException(dioExceptionToMessage(e));
+    }
+  }
+
+  @override
+  Future<void> deleteService(String id) async {
+    try {
+      await _remote.deleteService(int.parse(id));
+    } on DioException catch (e) {
+      throw ApiException(dioExceptionToMessage(e));
+    }
+  }
 }
