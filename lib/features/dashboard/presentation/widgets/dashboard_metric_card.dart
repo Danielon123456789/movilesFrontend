@@ -14,7 +14,7 @@ class DashboardMetricCard extends StatelessWidget {
   });
 
   final String label;
-  final int value;
+  final String value;
   final String subtext;
   final IconData icon;
   final Color iconColor;
@@ -55,7 +55,7 @@ class DashboardMetricCard extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  '$value',
+                  value,
                   style: textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                     color: colorScheme.onSurface,

@@ -10,12 +10,21 @@ import '../../../../shared/widgets/app_screen_header.dart';
 import '../controllers/dashboard_controller.dart';
 import '../widgets/dashboard_metric_card.dart';
 
+String _fmt(AsyncValue<int> v) => v.when(
+      data: (n) => '$n',
+      loading: () => '--',
+      error: (_, _) => '--',
+    );
+
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final metrics = ref.watch(dashboardMetricsProvider);
+    final monthAsync = ref.watch(monthAppointmentsCountProvider);
+    final completedAsync = ref.watch(completedAppointmentsCountProvider);
+    final activeCount = ref.watch(activePatientsCountProvider);
+    final inactiveCount = ref.watch(inactivePatientsCountProvider);
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -29,8 +38,8 @@ class DashboardScreen extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.md),
                   DashboardMetricCard(
                     label: 'Citas del Mes',
-                    value: metrics.monthlyAppointments,
-                    subtext: '${metrics.monthlyCompleted} completadas',
+                    value: _fmt(monthAsync),
+                    subtext: '${_fmt(completedAsync)} completadas',
                     icon: Icons.calendar_month,
                     iconColor: AppColors.chipActiveFg,
                     iconBgColor: AppColors.chipActiveBg,
@@ -38,7 +47,7 @@ class DashboardScreen extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.md),
                   DashboardMetricCard(
                     label: 'Pacientes de baja',
-                    value: metrics.inactivePatients,
+                    value: '$inactiveCount',
                     subtext: 'Total de pacientes',
                     icon: Icons.person_remove_outlined,
                     iconColor: AppColors.chipInactiveFg,
@@ -47,7 +56,7 @@ class DashboardScreen extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.md),
                   DashboardMetricCard(
                     label: 'Pacientes Activos',
-                    value: metrics.activePatients,
+                    value: '$activeCount',
                     subtext: 'Total de pacientes',
                     icon: Icons.groups_outlined,
                     iconColor: AppColors.accentBlue,
@@ -94,52 +103,5 @@ class DashboardScreen extends ConsumerWidget {
         context.go(Routes.dashboard);
         return;
     }
-  }
-}
-
-class _PendientesSection extends StatelessWidget {
-  const _PendientesSection();
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(
-              alpha: Theme.of(context).brightness == Brightness.dark
-                  ? 0.22
-                  : 0.06,
-            ),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Pendientes',
-            style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          Center(
-            child: Text(
-              'No hay pendientes',
-              style: textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

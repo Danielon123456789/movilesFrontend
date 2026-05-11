@@ -1,24 +1,36 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class DashboardMetrics {
-  const DashboardMetrics({
-    required this.monthlyAppointments,
-    required this.monthlyCompleted,
-    required this.inactivePatients,
-    required this.activePatients,
-  });
+import '../../../appointments/appointments_providers.dart';
+import '../../../patients/presentation/controllers/patients_controller.dart';
 
-  final int monthlyAppointments;
-  final int monthlyCompleted;
-  final int inactivePatients;
-  final int activePatients;
-}
-
-final dashboardMetricsProvider = Provider<DashboardMetrics>((ref) {
-  return const DashboardMetrics(
-    monthlyAppointments: 0,
-    monthlyCompleted: 0,
-    inactivePatients: 1,
-    activePatients: 3,
-  );
+final dashboardMonthAnchorProvider = Provider<DateTime>((ref) {
+  final now = DateTime.now();
+  return DateTime(now.year, now.month, 1);
 });
+
+final monthAppointmentsCountProvider = Provider<AsyncValue<int>>((ref) {
+  final anchor = ref.watch(dashboardMonthAnchorProvider);
+  return ref
+      .watch(monthAppointmentsProvider(anchor))
+      .whenData((list) => list.length);
+});
+
+final completedAppointmentsCountProvider = Provider<AsyncValue<int>>((ref) {
+  final anchor = ref.watch(dashboardMonthAnchorProvider);
+  final now = DateTime.now();
+  return ref.watch(monthAppointmentsProvider(anchor)).whenData(
+        (list) => list.where((a) => a.endDate.isBefore(now)).length,
+      );
+});
+
+final activePatientsCountProvider = Provider<int>((ref) => ref
+    .watch(patientsControllerProvider)
+    .patients
+    .where((p) => p.isActive)
+    .length);
+
+final inactivePatientsCountProvider = Provider<int>((ref) => ref
+    .watch(patientsControllerProvider)
+    .patients
+    .where((p) => !p.isActive)
+    .length);
