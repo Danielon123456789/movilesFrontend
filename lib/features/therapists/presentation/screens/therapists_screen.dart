@@ -137,7 +137,11 @@ class TherapistsScreen extends ConsumerWidget {
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 8),
         child: FloatingActionButton(
-          onPressed: () => showSetRoleModal(context),
+          onPressed: () async {
+            await showSetRoleModal(context);
+            ref.read(userFilterProvider.notifier).setQuery('');
+            ref.read(userFilterProvider.notifier).setRole('');
+          },
           backgroundColor: AppColors.accentBlue,
           elevation: 4,
           shape: const CircleBorder(),
