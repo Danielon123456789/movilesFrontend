@@ -1,24 +1,61 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
+import '../../../appointments/appointments_providers.dart';
 import '../../domain/entities/appointment.dart';
 
-class AppointmentDetailScreen extends StatelessWidget {
+class AppointmentDetailScreen extends ConsumerStatefulWidget {
   const AppointmentDetailScreen({super.key, required this.appointment});
 
   final Appointment appointment;
 
-  static const _pendingMessage = 'Este botón permitirá editar la cita actual.';
+  @override
+  ConsumerState<AppointmentDetailScreen> createState() =>
+      _AppointmentDetailScreenState();
+}
 
-  static const _mockTreatment =
-      'El paciente muestra una evolución favorable. '
-      'Se han completado los objetivos de la sesión anterior con éxito. '
-      'Recomiendo continuar con la pauta.';
+class _AppointmentDetailScreenState
+    extends ConsumerState<AppointmentDetailScreen> {
+  late String _notes;
+
+  @override
+  void initState() {
+    super.initState();
+    _notes = widget.appointment.notes;
+  }
+
+  Future<void> _openNotesDialog() async {
+    final controller = TextEditingController(text: _notes);
+    final saved = await showDialog<String>(
+      context: context,
+      builder: (ctx) => _NotesDialog(controller: controller),
+    );
+    if (saved == null || !mounted) return;
+
+    try {
+      await ref
+          .read(appointmentsRepositoryProvider)
+          .updateAppointmentNotes(widget.appointment.id, saved);
+      setState(() => _notes = saved);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Avances guardados correctamente.')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al guardar: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final appointment = widget.appointment;
+
     final formattedDate = DateFormat("EEEE, d 'De' MMMM 'De' yyyy", 'es')
         .format(appointment.date)
         .split(' ')
@@ -47,11 +84,7 @@ class AppointmentDetailScreen extends StatelessWidget {
                       therapistName: appointment.therapist,
                     ),
                     const SizedBox(height: AppSpacing.md),
-                    const Divider(
-                      height: 1,
-                      thickness: 1,
-                      color: AppColors.divider,
-                    ),
+                    const Divider(height: 1, thickness: 1, color: AppColors.divider),
                     const SizedBox(height: AppSpacing.lg),
                     _InfoRow(
                       imagePath: 'assets/images/icon_calendar.png',
@@ -79,36 +112,93 @@ class AppointmentDetailScreen extends StatelessWidget {
                     const SizedBox(height: AppSpacing.lg),
                     _InfoRow(
                       imagePath: 'assets/images/icon_treatment.png',
-                      label: 'TRATAMIENTO',
+                      label: 'AVANCES DE SESIÓN',
                       children: [
-                        Text(
-                          _mockTreatment,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                            color: AppColors.textMuted,
-                            height: 1.5,
-                          ),
-                        ),
+                        _notes.trim().isEmpty
+                            ? const Text(
+                                'Sin avances registrados aún.',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                  color: AppColors.textMuted,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              )
+                            : Text(
+                                _notes,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                  color: AppColors.textMuted,
+                                  height: 1.5,
+                                ),
+                              ),
                       ],
                     ),
                   ],
                 ),
               ),
             ),
-            _BottomButton(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text(_pendingMessage)),
-                );
-              },
-            ),
+            _BottomButton(onPressed: _openNotesDialog),
           ],
         ),
       ),
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+
+class _NotesDialog extends StatelessWidget {
+  const _NotesDialog({required this.controller});
+
+  final TextEditingController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return AlertDialog(
+      title: const Text(
+        'Avances de sesión',
+        style: TextStyle(fontWeight: FontWeight.w700),
+      ),
+      content: TextField(
+        controller: controller,
+        maxLines: 6,
+        autofocus: true,
+        decoration: InputDecoration(
+          hintText: 'Escribe los avances de esta sesión…',
+          filled: true,
+          fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: colorScheme.outlineVariant),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: colorScheme.outlineVariant),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancelar'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(controller.text.trim()),
+          child: const Text('Guardar'),
+        ),
+      ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
 
 class _Header extends StatelessWidget {
   const _Header({required this.onBack});

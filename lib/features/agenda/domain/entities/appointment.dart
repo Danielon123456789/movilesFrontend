@@ -6,6 +6,7 @@ class Appointment {
     required this.date,
     required this.timeRange,
     required this.therapist,
+    this.notes = '',
   });
 
   final String id;
@@ -14,4 +15,5 @@ class Appointment {
   final DateTime date;
   final String timeRange;
   final String therapist;
+  final String notes;
 }

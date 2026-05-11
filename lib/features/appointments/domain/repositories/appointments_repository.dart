@@ -26,4 +26,8 @@ abstract class AppointmentsRepository {
   });
 
   Future<void> deleteAppointment(String id);
+
+  Future<Appointment> updateAppointmentNotes(String id, String notes);
+
+  Future<List<Appointment>> fetchAppointmentsForPatient(String patientId);
 }

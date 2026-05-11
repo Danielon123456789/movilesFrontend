@@ -91,4 +91,33 @@ class AppointmentsRemoteDataSource {
   Future<void> deleteAppointment(int id) async {
     await _dio.delete('$_organizationPath/$id');
   }
+
+  Future<AppointmentModel> updateAppointmentNotes(
+    int id,
+    String notes,
+  ) async {
+    final response = await _dio.put<Map<String, dynamic>>(
+      '$_organizationPath/$id/notes',
+      data: <String, dynamic>{'notes': notes},
+    );
+    return AppointmentModel.fromJson(
+      Map<String, dynamic>.from(response.data as Map),
+    );
+  }
+
+  Future<List<AppointmentModel>> fetchAppointmentsForPatient(
+    int patientId,
+  ) async {
+    final response = await _dio.get(
+      _organizationPath,
+      queryParameters: <String, dynamic>{'patientId': patientId},
+    );
+    return (response.data as List)
+        .map(
+          (e) => AppointmentModel.fromJson(
+            Map<String, dynamic>.from(e as Map),
+          ),
+        )
+        .toList(growable: false);
+  }
 }

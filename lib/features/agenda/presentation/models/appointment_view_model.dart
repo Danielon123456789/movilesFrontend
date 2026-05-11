@@ -18,6 +18,7 @@ class AppointmentViewModel {
     this.serviceId,
     required this.startDate,
     required this.endDate,
+    this.notes = '',
   });
 
   final String id;
@@ -37,6 +38,7 @@ class AppointmentViewModel {
   final String? serviceId;
   final DateTime startDate;
   final DateTime endDate;
+  final String notes;
 
   factory AppointmentViewModel.fromApiAppointment(api.Appointment a) {
     final localStart = a.startDate.toLocal();
@@ -65,6 +67,7 @@ class AppointmentViewModel {
       serviceId: a.serviceId,
       startDate: a.startDate,
       endDate: a.endDate,
+      notes: a.notes,
     );
   }
 
@@ -83,6 +86,7 @@ class AppointmentViewModel {
       date: date,
       timeRange: timeRange,
       therapist: therapist,
+      notes: notes,
     );
   }
 }

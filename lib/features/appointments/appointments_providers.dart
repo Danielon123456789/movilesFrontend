@@ -60,6 +60,18 @@ final monthAppointmentsProvider = FutureProvider.autoDispose
   }
 });
 
+/// Todas las citas de un paciente (sin filtro de fecha). Solo ADMIN/SECRETARY.
+final patientAppointmentsProvider = FutureProvider.autoDispose
+    .family<List<Appointment>, String>((ref, patientId) async {
+  final repo = ref.watch(appointmentsRepositoryProvider);
+  try {
+    return await repo.fetchAppointmentsForPatient(patientId);
+  } catch (e, st) {
+    debugPrint('patientAppointmentsProvider: $e\n$st');
+    return [];
+  }
+});
+
 /// Días del mes visible con al menos una cita (para puntitos). Ante carga o
 /// error, conjunto vacío sin bloquear la UI.
 final daysWithAppointmentsForCalendarProvider =

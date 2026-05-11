@@ -101,4 +101,28 @@ class AppointmentsRepositoryImpl implements AppointmentsRepository {
       throw ApiException(dioExceptionToMessage(e));
     }
   }
+
+  @override
+  Future<Appointment> updateAppointmentNotes(String id, String notes) async {
+    try {
+      final model = await _remote.updateAppointmentNotes(int.parse(id), notes);
+      return _toEntity(model);
+    } on DioException catch (e) {
+      throw ApiException(dioExceptionToMessage(e));
+    }
+  }
+
+  @override
+  Future<List<Appointment>> fetchAppointmentsForPatient(
+    String patientId,
+  ) async {
+    try {
+      final models = await _remote.fetchAppointmentsForPatient(
+        int.parse(patientId),
+      );
+      return models.map(_toEntity).toList(growable: false);
+    } on DioException catch (e) {
+      throw ApiException(dioExceptionToMessage(e));
+    }
+  }
 }

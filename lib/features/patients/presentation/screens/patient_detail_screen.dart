@@ -1,46 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
+import '../../../appointments/appointments_providers.dart';
+import '../../../appointments/domain/entities/appointment.dart' as api;
 import '../../domain/entities/patient.dart';
 
-class PatientDetailScreen extends StatelessWidget {
+class PatientDetailScreen extends ConsumerWidget {
   const PatientDetailScreen({super.key, required this.patient});
 
   final Patient patient;
 
-  static const _mockAdmissionDate = '5 de febrero de 2024';
-
-  static const _mockWorkPlan =
-      'El paciente muestra una evolución favorable. '
-      'Se han completado los objetivos de la sesión anterior con éxito. '
-      'Recomiendo continuar con la pauta.';
-
-  static const _mockProgress = [
-    _ProgressData(
-      title: 'Sesión 4',
-      description:
-          'Mejora en la movilidad general. '
-          'Disminución del dolor reportado a un nivel 3/10.',
-      timeAgo: 'Hace 2 días',
-    ),
-    _ProgressData(
-      title: 'Sesión 3',
-      description:
-          'Logró completar los ejercicios de fortalecimiento sin asistencia.',
-      timeAgo: 'Hace 5 días',
-    ),
-    _ProgressData(
-      title: 'Sesión 2',
-      description:
-          'Se ajustó la rutina de estiramientos. '
-          'El paciente reporta menor rigidez matutina.',
-      timeAgo: 'Hace 1 semana',
-    ),
-  ];
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appointmentsAsync = ref.watch(
+      patientAppointmentsProvider(patient.id),
+    );
+
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: SafeArea(
@@ -56,66 +34,36 @@ class PatientDetailScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _LabelValue(
-                      label: 'NOMBRE DEL PACIENTE',
-                      value: patient.name,
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    const _LabelValue(
-                      label: 'FECHA DE INGRESO',
-                      value: _mockAdmissionDate,
-                    ),
+                    _LabelValue(label: 'NOMBRE DEL PACIENTE', value: patient.name),
+                    if (patient.email != null && patient.email!.isNotEmpty) ...[
+                      const SizedBox(height: AppSpacing.sm),
+                      _LabelValue(label: 'CORREO', value: patient.email!),
+                    ],
+                    if (patient.phoneNumber != null && patient.phoneNumber!.isNotEmpty) ...[
+                      const SizedBox(height: AppSpacing.sm),
+                      _LabelValue(label: 'TELÉFONO', value: patient.phoneNumber!),
+                    ],
                     const SizedBox(height: AppSpacing.lg),
-                    _InfoRow(
-                      imagePath: 'assets/images/icon_calendar.png',
-                      label: 'HORARIO DEL PACIENTE',
-                      children: [
-                        Text(
-                          patient.daysLabel,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                            color: AppColors.textMuted,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.xs),
-                        const Text(
-                          'Lunes : 09:30 - 10:30',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        const Text(
-                          'Martes : 14:00 - 16:00',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                      ],
-                    ),
+                    const Divider(height: 1, color: AppColors.divider),
                     const SizedBox(height: AppSpacing.lg),
-                    const _InfoRow(
-                      imagePath: 'assets/images/icon_treatment.png',
-                      label: 'PLAN DE TRABAJO',
-                      children: [
-                        Text(
-                          _mockWorkPlan,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                            color: AppColors.textMuted,
-                            height: 1.5,
-                          ),
+                    appointmentsAsync.when(
+                      loading: () => const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(AppSpacing.xl),
+                          child: CircularProgressIndicator(strokeWidth: 2),
                         ),
-                      ],
+                      ),
+                      error: (e, _) => Padding(
+                        padding: const EdgeInsets.all(AppSpacing.md),
+                        child: Text(
+                          'No se pudo cargar el historial.',
+                          style: TextStyle(color: AppColors.textMuted),
+                        ),
+                      ),
+                      data: (appointments) => _ProgressSection(
+                        appointments: appointments,
+                      ),
                     ),
-                    const SizedBox(height: AppSpacing.xl),
-                    _ProgressSection(items: _mockProgress),
                     const SizedBox(height: AppSpacing.lg),
                   ],
                 ),
@@ -207,80 +155,23 @@ class _LabelValue extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Icon + info row (reused pattern from appointment detail)
+// Progress / Avances section
 // ---------------------------------------------------------------------------
-
-class _InfoRow extends StatelessWidget {
-  const _InfoRow({
-    required this.imagePath,
-    required this.label,
-    required this.children,
-  });
-
-  final String imagePath;
-  final String label;
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: Image.asset(
-            imagePath,
-            width: 64,
-            height: 64,
-            fit: BoxFit.contain,
-          ),
-        ),
-        const SizedBox(width: AppSpacing.md),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              ...children,
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Progress section
-// ---------------------------------------------------------------------------
-
-class _ProgressData {
-  const _ProgressData({
-    required this.title,
-    required this.description,
-    required this.timeAgo,
-  });
-
-  final String title;
-  final String description;
-  final String timeAgo;
-}
 
 class _ProgressSection extends StatelessWidget {
-  const _ProgressSection({required this.items});
+  const _ProgressSection({required this.appointments});
 
-  final List<_ProgressData> items;
+  final List<api.Appointment> appointments;
 
   @override
   Widget build(BuildContext context) {
+    // Sort descending by start date (most recent first)
+    final sorted = [...appointments]
+      ..sort((a, b) => b.startDate.compareTo(a.startDate));
+
+    // Only show appointments that have notes
+    final withNotes = sorted.where((a) => a.notes.trim().isNotEmpty).toList();
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -291,19 +182,47 @@ class _ProgressSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Avances',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
+          Row(
+            children: [
+              const Text(
+                'Avances',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                '${sorted.length} cita${sorted.length != 1 ? 's' : ''}',
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textMuted,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: AppSpacing.md),
-          for (var i = 0; i < items.length; i++) ...[
-            _ProgressCard(data: items[i]),
-            if (i < items.length - 1) const SizedBox(height: AppSpacing.sm),
-          ],
+          if (withNotes.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
+              child: Text(
+                'Sin avances registrados todavía.',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: AppColors.textMuted,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            )
+          else
+            for (var i = 0; i < withNotes.length; i++) ...[
+              _ProgressCard(
+                appointment: withNotes[i],
+                sessionNumber: sorted.length - sorted.indexOf(withNotes[i]),
+              ),
+              if (i < withNotes.length - 1) const SizedBox(height: AppSpacing.sm),
+            ],
         ],
       ),
     );
@@ -311,12 +230,21 @@ class _ProgressSection extends StatelessWidget {
 }
 
 class _ProgressCard extends StatelessWidget {
-  const _ProgressCard({required this.data});
+  const _ProgressCard({
+    required this.appointment,
+    required this.sessionNumber,
+  });
 
-  final _ProgressData data;
+  final api.Appointment appointment;
+  final int sessionNumber;
 
   @override
   Widget build(BuildContext context) {
+    final localDate = appointment.startDate.toLocal();
+    final dateLabel = DateFormat("d 'de' MMMM 'de' yyyy", 'es').format(localDate);
+    final timeLabel =
+        '${localDate.hour.toString().padLeft(2, '0')}:${localDate.minute.toString().padLeft(2, '0')}';
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -331,7 +259,7 @@ class _ProgressCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            data.title,
+            'Sesión $sessionNumber',
             style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
@@ -340,7 +268,7 @@ class _ProgressCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            data.description,
+            appointment.notes,
             style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w400,
@@ -350,7 +278,7 @@ class _ProgressCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            data.timeAgo,
+            '$dateLabel · $timeLabel',
             style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
