@@ -126,7 +126,7 @@ class _SetRoleModalState extends ConsumerState<SetRoleModal> {
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              child: Text('Asignar rol'),
+              child: Text('Confirmar'),
             ),
           ),
         ],
